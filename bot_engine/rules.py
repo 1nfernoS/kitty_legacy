@@ -4,7 +4,6 @@ from vkbottle.dispatch.rules import ABCRule
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 
 
-
 class WhiteListRule(ABCRule[BaseMessageMin]):
     """
     Rule to check from where comes message.
@@ -20,4 +19,4 @@ class WhiteListRule(ABCRule[BaseMessageMin]):
     async def check(self, event: BaseMessageMin) -> bool:
         return event.peer_id - 2e9 in self.allowed_chats \
             if event.peer_id > 2e9 \
-            else event.peer_id not in IGNORE_LIST
+            else event.peer_id not in self.ignore_users
