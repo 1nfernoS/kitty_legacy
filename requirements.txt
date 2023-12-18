@@ -1,0 +1,5 @@
+pip=latest
+python-dotenv~=1.0.0
+mariadb>=1.0.11
+SQLAlchemy~=2.0.0
+vkbottle~=4.3.12

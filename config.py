@@ -1,0 +1,81 @@
+from typing import Tuple
+
+from os import environ as env
+
+from json import loads
+from dotenv import load_dotenv
+
+from data_typings import DbData
+
+
+# Load constants
+PIT_BOT: int = -182985865
+OVERSEER_BOT: int = -183040898
+COMMISSION_PERCENT: int = 10
+
+
+# load env
+if not load_dotenv('.env'):
+    raise EnvironmentError('No .env file')
+
+
+# id's of users in chat but not in guild (bots, guests, etc.)
+IGNORE_LIST: Tuple[int, ...] = (PIT_BOT, OVERSEER_BOT, *[int(i) for i in env.get('IGNORE').split(',')])
+
+GUILD_NAME: str = env.get('GUILD_NAME')
+GUILD_CHAT_ID: int = int(env.get('GUILD_CHAT_ID'))
+
+DISCOUNT_PERCENT: int = int(env.get('PERCENT_DISCOUNT'))
+
+NOTE_RULES: str = env.get('NOTE_RULES')
+NOTE_ALL: str = env.get('NOTE_ALL')
+
+APO_PAYMENT: int = int(env.get('PAYMENT_APO'))
+
+creator_id: int = int(env.get('CREATOR_ID'))
+
+
+# branch-depended
+branch = env.get('BRANCH')
+
+storager_id: int
+storager_chat: int
+storager_token: str
+
+LEADER_CHAT_ID: int
+LOGS_CHAT_ID: int
+ERROR_CHAT_ID: int
+
+group_token: str
+db_data: DbData
+# whitelist of chat id's for bot_engine to listen
+ALLOWED_CHATS: Tuple[int, ...]
+
+
+def load(branch_name: str):
+    if not load_dotenv('.env.' + branch_name):
+        print(f"No branch '{branch_name}', loaded 'dev' branch")
+        branch_name = 'dev'
+
+    if not load_dotenv('.env.' + branch_name, override=True):
+        raise EnvironmentError(f'No .env.{branch_name} file')
+
+    global group_token, db_data, ALLOWED_CHATS, storager_id, storager_chat, storager_token, \
+        LEADER_CHAT_ID, LOGS_CHAT_ID, ERROR_CHAT_ID
+
+    group_token = env.get('GROUP_TOKEN')
+    db_data = loads(env.get('DB_DATA'))
+    ALLOWED_CHATS = tuple(int(i) for i in env.get('ALLOWED_CHATS').split(','))
+
+    storager_id = int(env.get('STORAGER_ID'))
+    storager_chat = int(env.get('STORAGER_CHAT'))
+    storager_token = env.get('STORAGER_TOKEN')
+
+    LEADER_CHAT_ID = int(env.get('LEADER_CHAT_ID'))
+    LOGS_CHAT_ID = int(env.get('LOGS_CHAT_ID'))
+    ERROR_CHAT_ID = int(env.get('ERROR_CHAT_ID'))
+    return
+
+
+if __name__ == 'config':
+    load(branch)

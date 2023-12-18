@@ -1,0 +1,11 @@
+venv/
+test.*
+.idea/
+__pycache__/
+logs/
+pic_bot.py
+*.bat
+.env*
+*.sql
+*.log
+.ddls/
