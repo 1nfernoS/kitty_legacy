@@ -5,6 +5,8 @@ from config import group_token, ALLOWED_CHATS, IGNORE_LIST
 
 from .rules import WhiteListRule
 
+import handlers
+handlers.dummy()
 
 api = API(group_token)
 labeler = BotLabeler()

@@ -1,4 +1,3 @@
-# from vkbottle.bot import Message
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 from bot_engine import labeler
