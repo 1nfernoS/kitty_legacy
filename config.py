@@ -9,6 +9,8 @@ from data_typings import DbData
 
 
 # Load constants
+TZ: int = 3
+
 PIT_BOT: int = -182985865
 OVERSEER_BOT: int = -183040898
 COMMISSION_PERCENT: int = 10
