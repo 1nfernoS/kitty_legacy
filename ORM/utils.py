@@ -15,13 +15,10 @@ class Task(Base):
     __tablename__ = 'tasks'
 
     task_id: Mapped[int] = mapped_column(primary_key=True)
-    task_when: Mapped[datetime]
-    task_target: Mapped[str]
+    task_time_at: Mapped[datetime]
+    task_exec_target: Mapped[str]
     task_args: Mapped[str]
-    task_is_regular: Mapped[bool]
-    task_repeat_delay: Mapped[datetime]
-    task_call_after: Mapped[str]
-    task_timestamp: Mapped[datetime]
+    task_created_at: Mapped[datetime]
 
     def __init__(self, when: datetime, target: callable, args: Dict[str, Any] = None, is_regular: bool = False,
                  repeat_delay: datetime = 0, call_after: callable = None):

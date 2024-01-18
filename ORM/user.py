@@ -6,31 +6,31 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ORM import Base, session
 
-__all__ = ["Item", "Role", "UserStats", "UserInfo", "Equipment"]
+__all__ = ["Item", "Role", "User", "Equipment"]
 
 
 class Item(Base):
     __tablename__ = 'item'
 
-    item_id: Mapped[int] = mapped_column(primary_key=True)
-    item_name: Mapped[str]
-    item_has_price: Mapped[bool]
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    has_price: Mapped[bool]
 
-    item_users: Mapped[List["UserInfo"]] = relationship(secondary='equipment', back_populates='user_items',
+    item_users: Mapped[List["User"]] = relationship(secondary='equipment', back_populates='user_items',
                                                         viewonly=True)
 
     def __init__(self, item_id: int, name: str, has_price: bool = False):
         super().__init__()
-        self.item_id = item_id
-        self.item_name = name
-        self.item_has_price = has_price
+        self.id = item_id
+        self.name = name
+        self.has_price = has_price
         return
 
     def __str__(self):
-        return f'<Item {self.item_id}: {self.item_name}>'
+        return f'<Item {self.id}: {self.name}>'
 
     def __repr__(self):
-        return f'<Item {self.item_id}: {self.item_name}>'
+        return f'<Item {self.id}: {self.name}>'
 
 
 class Role(Base):
@@ -38,23 +38,23 @@ class Role(Base):
 
     role_id: Mapped[int] = mapped_column(primary_key=True)
     role_name: Mapped[str]
-    role_can_basic: Mapped[int]
-    role_can_get_buff: Mapped[int]
-    role_can_check_stats: Mapped[int]
-    role_can_balance: Mapped[int]
-    role_can_profile_app_check: Mapped[int]
-    role_can_change_balance: Mapped[int]
-    role_can_moderate: Mapped[int]
-    role_can_kick: Mapped[int]
-    role_can_check_all_balance: Mapped[int]
-    role_can_withdraw_bill: Mapped[int]
-    role_can_change_role: Mapped[int]
-    role_can_utils: Mapped[int]
-    role_can_take_money: Mapped[int]
-    role_can_take_books: Mapped[int]
-    role_can_take_ingredients: Mapped[int]
+    role_basic: Mapped[bool]
+    role_get_buff: Mapped[bool]
+    role_check_stats: Mapped[bool]
+    role_balance: Mapped[bool]
+    role_profile_app_check: Mapped[bool]
+    role_change_balance: Mapped[bool]
+    role_moderate: Mapped[bool]
+    role_kick: Mapped[bool]
+    role_check_all_balance: Mapped[bool]
+    role_withdraw_bill: Mapped[bool]
+    role_change_role: Mapped[bool]
+    role_utils: Mapped[bool]
+    role_take_money: Mapped[bool]
+    role_take_books: Mapped[bool]
+    role_take_ingredients: Mapped[bool]
 
-    role_users: Mapped[List["UserInfo"]] = relationship(back_populates='user_role', viewonly=True)
+    role_users: Mapped[List["User"]] = relationship(back_populates='user_role', viewonly=True)
 
     def __init__(self, role_id: int, name: str, can_basic: bool = False, can_get_buff: bool = False,
                  can_check_stats: bool = False, can_balance: bool = False, can_profile_app_check: bool = False,
@@ -67,48 +67,29 @@ class Role(Base):
             raise ValueError
         self.role_id = role_id
         self.role_name = name
-        self.role_can_basic = int(can_basic)
-        self.role_can_get_buff = int(can_get_buff)
-        self.role_can_check_stats = int(can_check_stats)
-        self.role_can_balance = int(can_balance)
-        self.role_can_profile_app_check = int(can_profile_app_check)
-        self.role_can_change_balance = int(can_change_balance)
-        self.role_can_moderate = int(can_moderate)
-        self.role_can_kick = int(can_kick)
-        self.role_can_check_all_balance = int(can_check_all_balance)
-        self.role_can_withdraw_bill = int(can_withdraw_bill)
-        self.role_can_change_role = int(can_change_role)
-        self.role_can_utils = int(can_utils)
-        self.role_can_take_money = int(can_take_money)
-        self.role_can_take_books = int(can_take_books)
-        self.role_can_take_ingredients = int(can_take_ingredients)
+        self.role_basic = can_basic
+        self.role_get_buff = can_get_buff
+        self.role_check_stats = can_check_stats
+        self.role_balance = can_balance
+        self.role_profile_app_check = can_profile_app_check
+        self.role_change_balance = can_change_balance
+        self.role_moderate = can_moderate
+        self.role_kick = can_kick
+        self.role_check_all_balance = can_check_all_balance
+        self.role_withdraw_bill = can_withdraw_bill
+        self.role_change_role = can_change_role
+        self.role_utils = can_utils
+        self.role_take_money = can_take_money
+        self.role_take_books = can_take_books
+        self.role_take_ingredients = can_take_ingredients
         return
 
     def role_level_access(self) -> int:
-        return int(f"{self.role_can_basic}{self.role_can_get_buff}{self.role_can_check_stats}{self.role_can_balance}"
-                   f"{self.role_can_profile_app_check}{self.role_can_change_balance}{self.role_can_moderate}"
-                   f"{self.role_can_kick}{self.role_can_check_all_balance}{self.role_can_withdraw_bill}"
-                   f"{self.role_can_change_role}{self.role_can_utils}{self.role_can_take_money}"
-                   f"{self.role_can_take_books}{self.role_can_take_ingredients}", 2)
-
-    def dict_access(self) -> Dict[str, int]:
-        return {
-            'role_can_basic': self.role_can_basic,
-            'role_can_get_buff': self.role_can_get_buff,
-            'role_can_check_stats': self.role_can_check_stats,
-            'role_can_balance': self.role_can_balance,
-            'role_can_profile_app_check': self.role_can_profile_app_check,
-            'role_can_change_balance': self.role_can_change_balance,
-            'role_can_moderate': self.role_can_moderate,
-            'role_can_kick': self.role_can_kick,
-            'role_can_check_all_balance': self.role_can_check_all_balance,
-            'role_can_withdraw_bill': self.role_can_withdraw_bill,
-            'role_can_change_role': self.role_can_change_role,
-            'role_can_utils': self.role_can_utils,
-            'role_can_take_money': self.role_can_take_money,
-            'role_can_take_books': self.role_can_take_books,
-            'role_can_take_ingredients': self.role_can_take_ingredients
-        }
+        return int(f"{self.role_basic}{self.role_get_buff}{self.role_check_stats}{self.role_balance}"
+                   f"{self.role_profile_app_check}{self.role_change_balance}{self.role_moderate}"
+                   f"{self.role_kick}{self.role_check_all_balance}{self.role_withdraw_bill}"
+                   f"{self.role_change_role}{self.role_utils}{self.role_take_money}"
+                   f"{self.role_take_books}{self.role_take_ingredients}", 2)
 
     def bin_access(self) -> str:
         return bin(self.role_level_access())[2:]
@@ -163,7 +144,7 @@ class Role(Base):
             return s.query(Role).filter(Role.role_name == 'blacklist').first()
 
     def __eq__(self, other: "Role"):
-        if type(other) != Role:
+        if not isinstance(other, Role):
             return False
         return self.role_id == other.role_id
 
@@ -174,100 +155,38 @@ class Role(Base):
         return f"<Role {self.role_id}: {self.role_name} ({self.bin_access()})>"
 
 
-class UserStats(Base):
-    __tablename__ = 'user_stats'
-
-    user_id: Mapped[int] = mapped_column(ForeignKey('user_info.user_id'), primary_key=True)
-    class_id: Mapped[int]
-    user_level: Mapped[int]
-    user_attack: Mapped[int]
-    user_defence: Mapped[int]
-    user_strength: Mapped[int]
-    user_agility: Mapped[int]
-    user_endurance: Mapped[int]
-    user_luck: Mapped[int]
-    user_accuracy: Mapped[int]
-    user_concentration: Mapped[int]
-    last_update: Mapped[datetime]
-
-    user_info: Mapped['UserInfo'] = relationship(back_populates='user_stats', viewonly=True)
-
-    def __init__(self, user_id: int, class_id: int = None, level: int = 1,
-                 attack: int = 5, defence: int = 5, strength: int = 5, agility: int = 5, endurance: int = 5,
-                 luck: int = 1, accuracy: int = 1, concentration: int = 1,
-                 last_update: datetime = datetime.now()):
-        super().__init__()
-        self.user_id = user_id
-        self.class_id = class_id
-        self.user_level = level
-        self.user_attack = attack
-        self.user_defence = defence
-        self.user_strength = strength
-        self.user_agility = agility
-        self.user_endurance = endurance
-        self.user_luck = luck
-        self.user_accuracy = accuracy
-        self.user_concentration = concentration
-        self.last_update = last_update
-        return
-
-    def __str__(self):
-        return f'<UserStats {self.user_id} ({self.last_update})>'
-
-    def __repr__(self):
-        return f'<UserStats {self.user_id} ({self.last_update})>'
-
-    def get_stats(self):
-        return {
-            'user_id': self.user_id,
-            'class_id': self.class_id,
-            'user_level': self.user_level,
-            'user_attack': self.user_attack,
-            'user_defence': self.user_defence,
-            'user_strength': self.user_strength,
-            'user_agility': self.user_agility,
-            'user_endurance': self.user_endurance,
-            'user_luck': self.user_luck,
-            'user_accuracy': self.user_accuracy,
-            'user_concentration': self.user_concentration,
-            'last_update': self.last_update
-        }
-
-
-class UserInfo(Base):
-    __tablename__ = 'user_info'
+class User(Base):
+    __tablename__ = 'users'
 
     user_id: Mapped[int] = mapped_column(primary_key=True)
-    user_profile_key: Mapped[str]
+    class_id: Mapped[int]
+    stat_level: Mapped[int]
+    stat_attack: Mapped[int]
+    stat_defence: Mapped[int]
+    stat_strength: Mapped[int]
+    stat_agility: Mapped[int]
+    stat_endurance: Mapped[int]
+    stat_luck: Mapped[int]
+    stat_accuracy: Mapped[int]
+    stat_concentration: Mapped[int]
+    update_profile: Mapped[datetime]
     role_id: Mapped[int] = mapped_column(ForeignKey('role.role_id'))
+    profile_key: Mapped[str]
     balance: Mapped[int]
-    elites_count: Mapped[int]
-    siege_flag: Mapped[bool]
+    update_balance: Mapped[datetime]
 
     user_items: Mapped[List["Item"]] = relationship(secondary='equipment', back_populates='item_users')
-    user_stats: Mapped["UserStats"] = relationship(back_populates='user_info')
     user_role: Mapped["Role"] = relationship(back_populates='role_users', viewonly=True)
 
-    def __init__(self, user_id: int, profile_key: str = None, role_id: int = 8, balance: int = 0, elites_count: int = 0,
-                 siege_flag: bool = False):
-        super().__init__()
-        self.user_id = user_id
-        self.user_profile_key = profile_key
-        self.role_id = role_id
-        self.balance = balance
-        self.elites_count = elites_count
-        self.siege_flag = siege_flag
-        return
-
     def __repr__(self):
-        return f'<UserInfo {self.user_id} ({self.role_id})>'
+        return f'<User {self.user_id} ({self.role_id})>'
 
     def __str__(self):
-        return f'<UserInfo {self.user_id} ({self.role_id})>'
+        return f'{self.user_id} ({self.user_role.role_name})'
 
 
 class Equipment(Base):
     __tablename__ = 'equipment'
 
-    user_id: Mapped[int] = mapped_column(ForeignKey(UserInfo.user_id), primary_key=True)
-    item_id: Mapped[int] = mapped_column(ForeignKey(Item.item_id), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.user_id), primary_key=True)
+    item_id: Mapped[int] = mapped_column(ForeignKey(Item.id), primary_key=True)
