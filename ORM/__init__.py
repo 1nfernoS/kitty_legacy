@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session
 
 from config import db_data
 
@@ -11,6 +11,10 @@ __engine = create_engine(__data_source, pool_size=10, max_overflow=20)
 
 
 class Base(DeclarativeBase):
+    type_annotation_map = {
+        int: Mapped[int],
+        str: Mapped[str]
+    }
     pass
 
 
@@ -29,6 +33,6 @@ if __name__ == 'ORM':
     from .buffer import *
     from .internal import *
     from .utils import *
-
+    
     Base.metadata.create_all(__engine)
     pass

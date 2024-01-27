@@ -41,6 +41,7 @@ class LogsElites(_LogsBase):
     def __repr__(self):
         return f"<LogsElites {self.timestamp} ({self.user_id}: {self.count})>"
 
+
 class __LogsItemsAction(_LogsBase):
 
     __tablename__ = 'logs_item_actions'
@@ -64,6 +65,7 @@ class LogsItems(_LogsBase):
     def __repr__(self):
         return f"<LogsItems [{self.timestamp}] {self.action} {self.user_to} - {self.item_id} ({self.count})>"
 
+
 class __LogsMoneyAction(_LogsBase):
 
     __tablename__ = 'logs_money_action'
@@ -86,4 +88,20 @@ class LogsMoney(_LogsBase):
 
     def __repr__(self):
         return f"<LogsMoney [{self.timestamp}] {self.user_id} ({self.action} {self.count})>"
+
+
+class LogsCommand(_LogsBase):
+
+    __tablename__ = 'logs_command'
+
+    command: Mapped[str] = mapped_column(nullable=False)
+    command_text: Mapped[str] = mapped_column(String(255), nullable=False)
+    on_user: Mapped[int] = mapped_column(nullable=False)
+    on_user_text: Mapped[str] = mapped_column(String(255), nullable=True)
+
+    def __str__(self):
+        return f"Command {self.command} from {self.user_id})"
+
+    def __repr__(self):
+        return f"<LogsCommand [{self.timestamp}] {self.user_id} ({self.command_text})>"
 
