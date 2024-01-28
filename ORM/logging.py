@@ -93,14 +93,14 @@ class LogsCommand(_LogsBase, Base):
         return f"<LogsCommand [{self.timestamp}] {self.user_id} ({self.command_text})>"
 
 
-class __LogsItemsAction(_LogsBase, Base):
+class __LogsItemsAction(Base):
 
     __tablename__ = 'logs_item_actions'
 
     action_type: Mapped[str] = mapped_column(String(63), primary_key=True)
 
 
-class __LogsMoneyAction(_LogsBase, Base):
+class __LogsMoneyAction(Base):
 
     __tablename__ = 'logs_money_action'
 

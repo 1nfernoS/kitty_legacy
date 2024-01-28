@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Set
 
 from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,7 +8,8 @@ from ORM import Base
 
 from utils.datetime import now
 
-__all__ = ["Item", "Role", "RoleGroup", "User", "Access"]
+__all__ = ["Item", "Role", "User",
+           "DEFAULT_ROLES"]
 
 
 class Item(Base):
@@ -21,41 +22,33 @@ class Item(Base):
     item_users: Mapped[List["User"]] = relationship(secondary='equipment', back_populates='user_items',
                                                     viewonly=True)
     
-    def __init__(self, item_id: int, name: str, has_price: bool = False):
-        super().__init__()
-        self.id = item_id
-        self.name = name
-        self.has_price = has_price
-        return
-    
     def __str__(self):
         return f'<Item {self.id}: {self.name}>'
     
     def __repr__(self):
         return f'<Item {self.id}: {self.name}>'
-
-
-class RoleGroup(Base):
-    __tablename__ = 'role_group'
-
-    group_name: Mapped[str] = mapped_column(String(127), primary_key=True)
-    
-    group_roles: Mapped[List["Role"]] = relationship(secondary='role_role_group', viewonly=True)
-    
-    def __str__(self):
-        return f'<RoleGroup {self.group_name}>'
-    
-    def __repr__(self):
-        return f'<RoleGroup {self.group_name}>'
 
 
 class Role(Base):
     __tablename__ = 'role'
-
-    name: Mapped[str] = mapped_column(String(127), primary_key=True)
-    role_group: Mapped[str] = mapped_column(ForeignKey(RoleGroup.group_name), nullable=True)
     
-    accesses: Mapped[List["RoleAccess"]] = relationship(secondary='role_access', back_populates='roles')
+    name: Mapped[str] = mapped_column(String(127), primary_key=True)
+    alias: Mapped[str] = mapped_column(String(63), nullable=False)
+    
+    bot_access: Mapped[bool] = mapped_column(Boolean, default=False)
+    admin_utils: Mapped[bool] = mapped_column(Boolean, default=False)
+    moderator: Mapped[bool] = mapped_column(Boolean, default=False)
+    change_role: Mapped[bool] = mapped_column(Boolean, default=False)
+    change_balance: Mapped[bool] = mapped_column(Boolean, default=False)
+    balance_access: Mapped[bool] = mapped_column(Boolean, default=False)
+    profile_app: Mapped[bool] = mapped_column(Boolean, default=False)
+    wallet: Mapped[bool] = mapped_column(Boolean, default=False)
+    take_money: Mapped[bool] = mapped_column(Boolean, default=False)
+    take_books: Mapped[bool] = mapped_column(Boolean, default=False)
+    take_ingredients: Mapped[bool] = mapped_column(Boolean, default=False)
+    take_buffs: Mapped[bool] = mapped_column(Boolean, default=False)
+    stats_access: Mapped[bool] = mapped_column(Boolean, default=False)
+    
     role_users: Mapped[List["User"]] = relationship(back_populates='user_role', viewonly=True)
     
     def __str__(self):
@@ -63,20 +56,6 @@ class Role(Base):
     
     def __repr__(self):
         return f"<Role {self.name}>"
-
-
-class Access(Base):
-    __tablename__ = 'access'
-    
-    access_name: Mapped[str] = mapped_column(String(127), primary_key=True)
-
-    roles: Mapped[List["Role"]] = relationship(secondary='role_access', back_populates='accesses')
-
-    def __str__(self):
-        return f'<{self.access_name} Access>'
-    
-    def __repr__(self):
-        return f'<Access {self.access_name}>'
 
 
 class User(Base):
@@ -116,16 +95,144 @@ class __Equipment(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey(Item.id), primary_key=True)
 
 
-class __RoleGroupRole(Base):
-    __tablename__ = 'role_role_group'
+DEFAULT_ROLES: Set[Role] = {
+    Role(name="creator", alias="Создатель",
+         bot_access=True,
+         admin_utils=True,
+         moderator=True,
+         change_role=True,
+         change_balance=True,
+         balance_access=True,
+         profile_app=True,
+         wallet=True,
+         take_money=True,
+         take_books=True,
+         take_ingredients=True,
+         take_buffs=True,
+         stats_access=True
+         ),
     
-    role_group: Mapped[str] = mapped_column(ForeignKey(RoleGroup.group_name), primary_key=True)
-    role: Mapped[str] = mapped_column(ForeignKey(Role.name), primary_key=True)
-
-
-class __RoleAccess(Base):
-    __tablename__ = 'role_access'
+    Role(name="leader", alias="Лидер",
+         bot_access=True,
+         admin_utils=False,
+         moderator=True,
+         change_role=True,
+         change_balance=True,
+         balance_access=True,
+         profile_app=True,
+         wallet=True,
+         take_money=True,
+         take_books=True,
+         take_ingredients=True,
+         take_buffs=True,
+         stats_access=True
+         ),
     
-    role: Mapped[str] = mapped_column(ForeignKey(Role.name), primary_key=True)
-    access: Mapped[str] = mapped_column(ForeignKey(Access.access_name), primary_key=True)
-    granted: Mapped[bool] = mapped_column(Boolean(), default=False)
+    Role(name="captain", alias="Капитан",
+         bot_access=True,
+         admin_utils=False,
+         moderator=True,
+         change_role=True,
+         change_balance=True,
+         balance_access=True,
+         profile_app=True,
+         wallet=True,
+         take_money=True,
+         take_books=True,
+         take_ingredients=True,
+         take_buffs=True,
+         stats_access=True
+         ),
+    
+    Role(name="officer", alias="Офицер",
+         bot_access=True,
+         admin_utils=False,
+         moderator=True,
+         change_role=False,
+         change_balance=False,
+         balance_access=True,
+         profile_app=True,
+         wallet=True,
+         take_money=True,
+         take_books=True,
+         take_ingredients=True,
+         take_buffs=True,
+         stats_access=True
+         ),
+    
+    Role(name="guild", alias="Согильдиец",
+         bot_access=True,
+         admin_utils=False,
+         moderator=False,
+         change_role=False,
+         change_balance=False,
+         balance_access=False,
+         profile_app=True,
+         wallet=True,
+         take_money=True,
+         take_books=True,
+         take_ingredients=True,
+         take_buffs=True,
+         stats_access=True),
+    
+    Role(name="newbie", alias="Новичок",
+         bot_access=True,
+         admin_utils=False,
+         moderator=False,
+         change_role=False,
+         change_balance=False,
+         balance_access=False,
+         profile_app=False,
+         wallet=True,
+         take_money=False,
+         take_books=False,
+         take_ingredients=True,
+         take_buffs=True,
+         stats_access=True),
+    
+    Role(name="guest", alias="Гость гильдии",
+         bot_access=True,
+         admin_utils=False,
+         moderator=False,
+         change_role=False,
+         change_balance=False,
+         balance_access=False,
+         profile_app=False,
+         wallet=False,
+         take_money=False,
+         take_books=False,
+         take_ingredients=False,
+         take_buffs=True,
+         stats_access=True),
+    
+    Role(name="other", alias="Неизвестный",
+         bot_access=True,
+         admin_utils=False,
+         moderator=False,
+         change_role=False,
+         change_balance=False,
+         balance_access=False,
+         profile_app=False,
+         wallet=False,
+         take_money=False,
+         take_books=False,
+         take_ingredients=False,
+         take_buffs=False,
+         stats_access=False),
+    
+    Role(name="blacklist", alias="Бан",
+         bot_access=False,
+         admin_utils=False,
+         moderator=False,
+         change_role=False,
+         change_balance=False,
+         balance_access=False,
+         profile_app=False,
+         wallet=False,
+         take_money=False,
+         take_books=False,
+         take_ingredients=False,
+         take_buffs=False,
+         stats_access=False
+         )
+}
