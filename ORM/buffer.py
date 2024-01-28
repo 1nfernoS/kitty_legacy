@@ -1,18 +1,18 @@
 from typing import List
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ORM import Base
 
-__all__ = ["BuffType", "BuffTypeCmd", "BuffCmd", "BuffUser"]
+__all__ = ["BuffType", "BuffCmd", "BuffUser"]
 
 
 class BuffType(Base):
     __tablename__ = 'buff_type'
 
     buff_type_id: Mapped[int] = mapped_column(primary_key=True)
-    buff_type_name: Mapped[str]
+    buff_type_name: Mapped[str] = mapped_column(String(127))
 
     buff_users: Mapped[List["BuffUser"]] = relationship(back_populates='buff_user_type')
     buff_commands: Mapped[List["BuffCmd"]] = relationship(secondary='buff_type_cmd', back_populates='buff_cmd_type')
@@ -34,7 +34,7 @@ class BuffCmd(Base):
     __tablename__ = 'buff_cmd'
 
     buff_cmd_id: Mapped[int] = mapped_column(primary_key=True)
-    buff_cmd_text: Mapped[str]
+    buff_cmd_text: Mapped[str] = mapped_column(String(127))
 
     buff_cmd_type: Mapped[BuffType] = relationship(secondary='buff_type_cmd', back_populates='buff_commands',
                                                    viewonly=True)
@@ -52,20 +52,13 @@ class BuffCmd(Base):
         return f"<BuffCmd {self.buff_cmd_id}: {self.buff_cmd_text}>"
 
 
-class BuffTypeCmd(Base):
-    __tablename__ = 'buff_type_cmd'
-
-    buff_type_id: Mapped[int] = mapped_column(ForeignKey(BuffType.buff_type_id), primary_key=True)
-    buff_cmd_id: Mapped[int] = mapped_column(ForeignKey(BuffCmd.buff_cmd_id), primary_key=True)
-
-
 class BuffUser(Base):
     __tablename__ = 'buff_user'
 
     buff_user_id: Mapped[int] = mapped_column(primary_key=True)
     buff_user_is_active: Mapped[bool]
-    buff_user_profile_key: Mapped[str]
-    buff_user_token: Mapped[str]
+    buff_user_profile_key: Mapped[str] = mapped_column(String(32))
+    buff_user_token: Mapped[str] = mapped_column(String(255))
     buff_type_id: Mapped[int] = mapped_column(ForeignKey(BuffType.buff_type_id))
     buff_user_race1: Mapped[int]
     buff_user_race2: Mapped[int]
@@ -91,3 +84,10 @@ class BuffUser(Base):
 
     def __repr__(self):
         return f"<BuffUser {self.buff_user_id}: {self.buff_type_id}>"
+
+
+class __BuffTypeCmd(Base):
+    __tablename__ = 'buff_type_cmd'
+
+    buff_type_id: Mapped[int] = mapped_column(ForeignKey(BuffType.buff_type_id), primary_key=True)
+    buff_cmd_id: Mapped[int] = mapped_column(ForeignKey(BuffCmd.buff_cmd_id), primary_key=True)

@@ -3,6 +3,8 @@ from vkbottle.bot import Bot, BotLabeler
 
 from config import group_token, ALLOWED_CHATS, IGNORE_LIST
 
+import ORM
+
 from .rules import WhiteListRule
 
 api = API(group_token)

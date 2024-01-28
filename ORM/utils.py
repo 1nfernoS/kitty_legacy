@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ORM import Base, session
 
 from config import TZ
+from utils.datetime import now
 
 
 __all__ = ["Task", "Notes"]
@@ -16,9 +18,9 @@ class Task(Base):
 
     task_id: Mapped[int] = mapped_column(primary_key=True)
     task_time_at: Mapped[datetime]
-    task_exec_target: Mapped[str]
-    task_args: Mapped[str]
-    task_created_at: Mapped[datetime]
+    task_exec_target: Mapped[str] = mapped_column(String(127))
+    task_args: Mapped[str] = mapped_column(String(255))
+    task_created_at: Mapped[datetime] = mapped_column(default=now())
     task_active: Mapped[bool] = mapped_column(default=True)
     task_regular: Mapped[bool] = mapped_column(default=False)
 
@@ -43,7 +45,7 @@ class Notes(Base):
 
     note_id: Mapped[int] = mapped_column(primary_key=True)
     note_author: Mapped[int]
-    note_text: Mapped[str]
+    note_text: Mapped[str] = mapped_column(String(255))
     expires_in: Mapped[datetime]
     is_active: Mapped[bool]
 

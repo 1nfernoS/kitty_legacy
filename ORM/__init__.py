@@ -11,10 +11,6 @@ __engine = create_engine(__data_source, pool_size=10, max_overflow=20)
 
 
 class Base(DeclarativeBase):
-    type_annotation_map = {
-        int: Mapped[int],
-        str: Mapped[str]
-    }
     pass
 
 
@@ -23,16 +19,16 @@ def session() -> Session:
 
 
 __all__ = ["session", "Base",
-           "Item", "Role", "UserStats", "UserInfo", "Equipment",
-           "BuffType", "BuffTypeCmd", "BuffCmd", "BuffUser",
-           "LogsType", "Logs",
+           "Item", "Role", "RoleGroup", "User", "Access",
+           "BuffType", "BuffCmd", "BuffUser",
+           "LogsCommand", "LogsMoney", "LogsItems", "LogsSiege", "LogsElites",
            "Task", "Notes"]
 
 if __name__ == 'ORM':
     from .user import *
     from .buffer import *
-    from .internal import *
     from .utils import *
+    from .logging import *
     
     Base.metadata.create_all(__engine)
     pass

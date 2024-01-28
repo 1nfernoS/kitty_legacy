@@ -3,20 +3,21 @@ from datetime import datetime
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from . import Base
 
 from utils.datetime import now
 
 
-__all__ = ("LogsSiege", "LogsElites")
+__all__ = ("LogsSiege", "LogsElites", "LogsItems", "LogsMoney", "LogsCommand")
 
 
-class _LogsBase(DeclarativeBase):
+class _LogsBase:
     log_id: Mapped[int] = mapped_column(primary_key=True)
     timestamp: Mapped[datetime] = mapped_column(default=datetime.utcnow())
     user_id: Mapped[int] = mapped_column(nullable=False)
 
 
-class LogsSiege(_LogsBase):
+class LogsSiege(_LogsBase, Base):
 
     __tablename__ = 'logs_siege'
 
@@ -29,7 +30,7 @@ class LogsSiege(_LogsBase):
         return f"<LogsSiege {self.timestamp} ({self.user_id})>"
 
 
-class LogsElites(_LogsBase):
+class LogsElites(_LogsBase, Base):
 
     __tablename__ = 'logs_elites'
 
@@ -42,21 +43,14 @@ class LogsElites(_LogsBase):
         return f"<LogsElites {self.timestamp} ({self.user_id}: {self.count})>"
 
 
-class __LogsItemsAction(_LogsBase):
-
-    __tablename__ = 'logs_item_actions'
-
-    action_type: Mapped[str] = mapped_column(primary_key=True)
-
-
-class LogsItems(_LogsBase):
+class LogsItems(_LogsBase, Base):
 
     __tablename__ = 'logs_items'
 
     action: Mapped[str] = mapped_column(ForeignKey('logs_item_actions.action_type'),
                                         nullable=False)
     user_to: Mapped[int] = mapped_column(nullable=False)
-    item_id: Mapped[int] = mapped_column(ForeignKey('items.id'), nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey('item.id'), nullable=False)
     count: Mapped[int] = mapped_column(nullable=False, default=1)
 
     def __str__(self):
@@ -66,14 +60,7 @@ class LogsItems(_LogsBase):
         return f"<LogsItems [{self.timestamp}] {self.action} {self.user_to} - {self.item_id} ({self.count})>"
 
 
-class __LogsMoneyAction(_LogsBase):
-
-    __tablename__ = 'logs_money_action'
-
-    action_type: Mapped[str] = mapped_column(primary_key=True)
-
-
-class LogsMoney(_LogsBase):
+class LogsMoney(_LogsBase, Base):
 
     __tablename__ = 'logs_money'
 
@@ -90,11 +77,11 @@ class LogsMoney(_LogsBase):
         return f"<LogsMoney [{self.timestamp}] {self.user_id} ({self.action} {self.count})>"
 
 
-class LogsCommand(_LogsBase):
+class LogsCommand(_LogsBase, Base):
 
     __tablename__ = 'logs_command'
 
-    command: Mapped[str] = mapped_column(nullable=False)
+    command: Mapped[str] = mapped_column(String(127), nullable=False)
     command_text: Mapped[str] = mapped_column(String(255), nullable=False)
     on_user: Mapped[int] = mapped_column(nullable=False)
     on_user_text: Mapped[str] = mapped_column(String(255), nullable=True)
@@ -104,4 +91,18 @@ class LogsCommand(_LogsBase):
 
     def __repr__(self):
         return f"<LogsCommand [{self.timestamp}] {self.user_id} ({self.command_text})>"
+
+
+class __LogsItemsAction(_LogsBase, Base):
+
+    __tablename__ = 'logs_item_actions'
+
+    action_type: Mapped[str] = mapped_column(String(63), primary_key=True)
+
+
+class __LogsMoneyAction(_LogsBase, Base):
+
+    __tablename__ = 'logs_money_action'
+
+    action_type: Mapped[str] = mapped_column(String(63), primary_key=True)
 
