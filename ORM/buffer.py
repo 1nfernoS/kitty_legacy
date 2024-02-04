@@ -1,12 +1,11 @@
-from typing import List, Set
+from typing import List
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from ORM import Base
+from ORM import Base, session
 
-__all__ = ["BufferType", "BuffCmd", "BuffTypeCmd", "BuffUser",
-           "DEFAULT_BUFFER_TYPES", "DEFAULT_BUFFER_COMMANDS", "DEFAULT_BUFFER_TYPE_COMMANDS"]
+__all__ = ["BufferType", "BuffCmd", "BuffTypeCmd", "BuffUser"]
 
 
 class BufferType(Base):
@@ -82,42 +81,50 @@ class BuffTypeCmd(Base):
     buff_cmd_id: Mapped[int] = mapped_column(ForeignKey(BuffCmd.buff_cmd_id), primary_key=True)
 
 
-DEFAULT_BUFFER_COMMANDS: Set[BuffCmd] = {
-    BuffCmd(buff_cmd_id=1, buff_cmd_text="Очищение"),
-    BuffCmd(buff_cmd_id=2, buff_cmd_text="Проклятие боли"),
-    BuffCmd(buff_cmd_id=3, buff_cmd_text="Проклятие неудачи"),
-    BuffCmd(buff_cmd_id=4, buff_cmd_text="Проклятие добычи"),
-    BuffCmd(buff_cmd_id=5, buff_cmd_text="Очищение огнем"),
-    BuffCmd(buff_cmd_id=6, buff_cmd_text="Очищение светом"),
-    BuffCmd(buff_cmd_id=7, buff_cmd_text="Благословение атаки"),
-    BuffCmd(buff_cmd_id=8, buff_cmd_text="Благословение защиты"),
-    BuffCmd(buff_cmd_id=9, buff_cmd_text="Благословение удачи"),
-    BuffCmd(buff_cmd_id=10, buff_cmd_text="Благословение race1"),
-    BuffCmd(buff_cmd_id=11, buff_cmd_text="Благословение race2"),
-    BuffCmd(buff_cmd_id=12, buff_cmd_text="Благословение зимы"),
-}
+@event.listens_for(BuffCmd.__table__, 'after_create')
+def default_commands(*a, **kw):
+    with session() as s:
+        s.add(BuffCmd(buff_cmd_id=1, buff_cmd_text="Очищение"))
+        s.add(BuffCmd(buff_cmd_id=2, buff_cmd_text="Проклятие боли"))
+        s.add(BuffCmd(buff_cmd_id=3, buff_cmd_text="Проклятие неудачи"))
+        s.add(BuffCmd(buff_cmd_id=4, buff_cmd_text="Проклятие добычи"))
+        s.add(BuffCmd(buff_cmd_id=5, buff_cmd_text="Очищение огнем"))
+        s.add(BuffCmd(buff_cmd_id=6, buff_cmd_text="Очищение светом"))
+        s.add(BuffCmd(buff_cmd_id=7, buff_cmd_text="Благословение атаки"))
+        s.add(BuffCmd(buff_cmd_id=8, buff_cmd_text="Благословение защиты"))
+        s.add(BuffCmd(buff_cmd_id=9, buff_cmd_text="Благословение удачи"))
+        s.add(BuffCmd(buff_cmd_id=10, buff_cmd_text="Благословение race1"))
+        s.add(BuffCmd(buff_cmd_id=11, buff_cmd_text="Благословение race2"))
+        s.add(BuffCmd(buff_cmd_id=12, buff_cmd_text="Благословение зимы"))
+        s.commit()
 
-DEFAULT_BUFFER_TYPES: Set[BufferType] = {
-    BufferType(buff_type_id=14088, buff_type_name="Паладин"),
-    BufferType(buff_type_id=14093, buff_type_name="Чернокнижник"),
-    BufferType(buff_type_id=14256, buff_type_name="Паладин Крестоносец"),
-    BufferType(buff_type_id=14257, buff_type_name="Паладин Воплощение_света"),
-    BufferType(buff_type_id=14264, buff_type_name="Апостол"),
-}
 
-DEFAULT_BUFFER_TYPE_COMMANDS: Set[BuffTypeCmd] = {
-    BuffTypeCmd(buff_type_id=14088, buff_cmd_id=1),
-    BuffTypeCmd(buff_type_id=14093, buff_cmd_id=2),
-    BuffTypeCmd(buff_type_id=14093, buff_cmd_id=3),
-    BuffTypeCmd(buff_type_id=14093, buff_cmd_id=4),
-    BuffTypeCmd(buff_type_id=14256, buff_cmd_id=1),
-    BuffTypeCmd(buff_type_id=14256, buff_cmd_id=5),
-    BuffTypeCmd(buff_type_id=14257, buff_cmd_id=1),
-    BuffTypeCmd(buff_type_id=14257, buff_cmd_id=6),
-    BuffTypeCmd(buff_type_id=14264, buff_cmd_id=7),
-    BuffTypeCmd(buff_type_id=14264, buff_cmd_id=8),
-    BuffTypeCmd(buff_type_id=14264, buff_cmd_id=9),
-    BuffTypeCmd(buff_type_id=14264, buff_cmd_id=10),
-    BuffTypeCmd(buff_type_id=14264, buff_cmd_id=11),
-    BuffTypeCmd(buff_type_id=14264, buff_cmd_id=12)
-}
+@event.listens_for(BufferType.__table__, "after_create")
+def default_buffer_types(*a, **kw):
+    with session() as s:
+        s.add(BufferType(buff_type_id=14088, buff_type_name="Паладин"))
+        s.add(BufferType(buff_type_id=14093, buff_type_name="Чернокнижник"))
+        s.add(BufferType(buff_type_id=14256, buff_type_name="Паладин Крестоносец"))
+        s.add(BufferType(buff_type_id=14257, buff_type_name="Паладин Воплощение_света"))
+        s.add(BufferType(buff_type_id=14264, buff_type_name="Апостол"))
+        s.commit()
+
+
+@event.listens_for(BuffTypeCmd.__table__, "after_create")
+def default_buffer_type_cmd(*a, **kw):
+    with session() as s:
+        s.add(BuffTypeCmd(buff_type_id=14088, buff_cmd_id=1))
+        s.add(BuffTypeCmd(buff_type_id=14093, buff_cmd_id=2))
+        s.add(BuffTypeCmd(buff_type_id=14093, buff_cmd_id=3))
+        s.add(BuffTypeCmd(buff_type_id=14093, buff_cmd_id=4))
+        s.add(BuffTypeCmd(buff_type_id=14256, buff_cmd_id=1))
+        s.add(BuffTypeCmd(buff_type_id=14256, buff_cmd_id=5))
+        s.add(BuffTypeCmd(buff_type_id=14257, buff_cmd_id=1))
+        s.add(BuffTypeCmd(buff_type_id=14257, buff_cmd_id=6))
+        s.add(BuffTypeCmd(buff_type_id=14264, buff_cmd_id=7))
+        s.add(BuffTypeCmd(buff_type_id=14264, buff_cmd_id=8))
+        s.add(BuffTypeCmd(buff_type_id=14264, buff_cmd_id=9))
+        s.add(BuffTypeCmd(buff_type_id=14264, buff_cmd_id=10))
+        s.add(BuffTypeCmd(buff_type_id=14264, buff_cmd_id=11))
+        s.add(BuffTypeCmd(buff_type_id=14264, buff_cmd_id=12))
+        s.commit()

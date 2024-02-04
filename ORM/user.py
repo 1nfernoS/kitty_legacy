@@ -1,15 +1,14 @@
 from datetime import datetime
-from typing import List, Set
+from typing import List
 
-from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy import Boolean, ForeignKey, String, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from ORM import Base
+from ORM import Base, session
 
 from utils.datetime import now
 
-__all__ = ["Item", "Role", "User",
-           "DEFAULT_ROLES"]
+__all__ = ["Item", "Role", "User"]
 
 
 class Item(Base):
@@ -95,144 +94,158 @@ class __Equipment(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey(Item.id), primary_key=True)
 
 
-DEFAULT_ROLES: Set[Role] = {
-    Role(name="creator", alias="Создатель",
-         bot_access=True,
-         admin_utils=True,
-         moderator=True,
-         change_role=True,
-         change_balance=True,
-         balance_access=True,
-         profile_app=True,
-         wallet=True,
-         take_money=True,
-         take_books=True,
-         take_ingredients=True,
-         take_buffs=True,
-         stats_access=True
-         ),
-    
-    Role(name="leader", alias="Лидер",
-         bot_access=True,
-         admin_utils=False,
-         moderator=True,
-         change_role=True,
-         change_balance=True,
-         balance_access=True,
-         profile_app=True,
-         wallet=True,
-         take_money=True,
-         take_books=True,
-         take_ingredients=True,
-         take_buffs=True,
-         stats_access=True
-         ),
-    
-    Role(name="captain", alias="Капитан",
-         bot_access=True,
-         admin_utils=False,
-         moderator=True,
-         change_role=True,
-         change_balance=True,
-         balance_access=True,
-         profile_app=True,
-         wallet=True,
-         take_money=True,
-         take_books=True,
-         take_ingredients=True,
-         take_buffs=True,
-         stats_access=True
-         ),
-    
-    Role(name="officer", alias="Офицер",
-         bot_access=True,
-         admin_utils=False,
-         moderator=True,
-         change_role=False,
-         change_balance=False,
-         balance_access=True,
-         profile_app=True,
-         wallet=True,
-         take_money=True,
-         take_books=True,
-         take_ingredients=True,
-         take_buffs=True,
-         stats_access=True
-         ),
-    
-    Role(name="guild", alias="Согильдиец",
-         bot_access=True,
-         admin_utils=False,
-         moderator=False,
-         change_role=False,
-         change_balance=False,
-         balance_access=False,
-         profile_app=True,
-         wallet=True,
-         take_money=True,
-         take_books=True,
-         take_ingredients=True,
-         take_buffs=True,
-         stats_access=True),
-    
-    Role(name="newbie", alias="Новичок",
-         bot_access=True,
-         admin_utils=False,
-         moderator=False,
-         change_role=False,
-         change_balance=False,
-         balance_access=False,
-         profile_app=False,
-         wallet=True,
-         take_money=False,
-         take_books=False,
-         take_ingredients=True,
-         take_buffs=True,
-         stats_access=True),
-    
-    Role(name="guest", alias="Гость гильдии",
-         bot_access=True,
-         admin_utils=False,
-         moderator=False,
-         change_role=False,
-         change_balance=False,
-         balance_access=False,
-         profile_app=False,
-         wallet=False,
-         take_money=False,
-         take_books=False,
-         take_ingredients=False,
-         take_buffs=True,
-         stats_access=True),
-    
-    Role(name="other", alias="Неизвестный",
-         bot_access=True,
-         admin_utils=False,
-         moderator=False,
-         change_role=False,
-         change_balance=False,
-         balance_access=False,
-         profile_app=False,
-         wallet=False,
-         take_money=False,
-         take_books=False,
-         take_ingredients=False,
-         take_buffs=False,
-         stats_access=False),
-    
-    Role(name="blacklist", alias="Бан",
-         bot_access=False,
-         admin_utils=False,
-         moderator=False,
-         change_role=False,
-         change_balance=False,
-         balance_access=False,
-         profile_app=False,
-         wallet=False,
-         take_money=False,
-         take_books=False,
-         take_ingredients=False,
-         take_buffs=False,
-         stats_access=False
-         )
-}
+@event.listens_for(Role.__table__, 'after_create')
+def default_roles(*a, **kw):
+    with session() as s:
+        s.add(Role(name="creator", alias="Создатель",
+                   bot_access=True,
+                   admin_utils=True,
+                   moderator=True,
+                   change_role=True,
+                   change_balance=True,
+                   balance_access=True,
+                   profile_app=True,
+                   wallet=True,
+                   take_money=True,
+                   take_books=True,
+                   take_ingredients=True,
+                   take_buffs=True,
+                   stats_access=True
+                   ))
+              
+        s.add(Role(name="leader", alias="Лидер",
+                   bot_access=True,
+                   admin_utils=False,
+                   moderator=True,
+                   change_role=True,
+                   change_balance=True,
+                   balance_access=True,
+                   profile_app=True,
+                   wallet=True,
+                   take_money=True,
+                   take_books=True,
+                   take_ingredients=True,
+                   take_buffs=True,
+                   stats_access=True
+                   ))
+        
+        s.add(Role(name="captain", alias="Капитан",
+                   bot_access=True,
+                   admin_utils=False,
+                   moderator=True,
+                   change_role=True,
+                   change_balance=True,
+                   balance_access=True,
+                   profile_app=True,
+                   wallet=True,
+                   take_money=True,
+                   take_books=True,
+                   take_ingredients=True,
+                   take_buffs=True,
+                   stats_access=True
+                   ))
+        
+        s.add(Role(name="officer", alias="Офицер",
+                   bot_access=True,
+                   admin_utils=False,
+                   moderator=True,
+                   change_role=False,
+                   change_balance=False,
+                   balance_access=True,
+                   profile_app=True,
+                   wallet=True,
+                   take_money=True,
+                   take_books=True,
+                   take_ingredients=True,
+                   take_buffs=True,
+                   stats_access=True
+                   ))
+        
+        s.add(Role(name="guild", alias="Согильдиец",
+                   bot_access=True,
+                   admin_utils=False,
+                   moderator=False,
+                   change_role=False,
+                   change_balance=False,
+                   balance_access=False,
+                   profile_app=True,
+                   wallet=True,
+                   take_money=True,
+                   take_books=True,
+                   take_ingredients=True,
+                   take_buffs=True,
+                   stats_access=True))
+        
+        s.add(Role(name="newbie", alias="Новичок",
+                   bot_access=True,
+                   admin_utils=False,
+                   moderator=False,
+                   change_role=False,
+                   change_balance=False,
+                   balance_access=False,
+                   profile_app=False,
+                   wallet=True,
+                   take_money=False,
+                   take_books=False,
+                   take_ingredients=True,
+                   take_buffs=True,
+                   stats_access=True))
+        
+        s.add(Role(name="guest", alias="Гость гильдии",
+                   bot_access=True,
+                   admin_utils=False,
+                   moderator=False,
+                   change_role=False,
+                   change_balance=False,
+                   balance_access=False,
+                   profile_app=False,
+                   wallet=False,
+                   take_money=False,
+                   take_books=False,
+                   take_ingredients=False,
+                   take_buffs=True,
+                   stats_access=True))
+        
+        s.add(Role(name="other", alias="Неизвестный",
+                   bot_access=True,
+                   admin_utils=False,
+                   moderator=False,
+                   change_role=False,
+                   change_balance=False,
+                   balance_access=False,
+                   profile_app=False,
+                   wallet=False,
+                   take_money=False,
+                   take_books=False,
+                   take_ingredients=False,
+                   take_buffs=False,
+                   stats_access=False))
+        
+        s.add(Role(name="blacklist", alias="Бан",
+                   bot_access=False,
+                   admin_utils=False,
+                   moderator=False,
+                   change_role=False,
+                   change_balance=False,
+                   balance_access=False,
+                   profile_app=False,
+                   wallet=False,
+                   take_money=False,
+                   take_books=False,
+                   take_ingredients=False,
+                   take_buffs=False,
+                   stats_access=False
+                   ))
+        s.commit()
+
+
+@event.listens_for(Item.__table__, "after_create")
+def default_items(*a, **kw):
+    with open('ORM/data/items.json') as f:
+        import json
+        items = json.loads(f.read())
+    with session() as s:
+        for item in items:
+            s.add(Item(id=item, name=items[item]['name'], has_price=items[item]['sell']))
+        s.commit()
+        
