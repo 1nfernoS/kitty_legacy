@@ -3,6 +3,8 @@ from collections.abc import Sequence
 from vkbottle.dispatch.rules import ABCRule
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 
+from data_typings.enums import RoleAccess
+
 
 class WhiteListRule(ABCRule[BaseMessageMin]):
     """
@@ -20,3 +22,28 @@ class WhiteListRule(ABCRule[BaseMessageMin]):
         return event.peer_id - 2e9 in self.allowed_chats \
             if event.peer_id > 2e9 \
             else event.peer_id not in self.ignore_users
+
+
+class AccessRule(ABCRule[BaseMessageMin]):
+    def __init__(self, require_access: RoleAccess):
+        self.require = require_access.value
+        return
+    
+    async def check(self, event: BaseMessageMin) -> bool:
+        if event.from_id < 0:
+            return False
+        from ORM import session, User, Role
+        with session() as s:
+            user: User = s.query(User).filter(User.user_id == event.from_id).first()
+            user_role: Role = user.user_role
+        if not user:
+            user = User(user_id=event.from_id)
+            with session() as s:
+                s.add(user)
+                s.commit()
+            return False
+            # TODO: Reg user and check again
+            # with session() as s:
+            #     user = s.query(User).filter(User.user_id == event.from_id).first()
+            #     user_role: Role = user.user_role
+        return getattr(user_role, self.require)

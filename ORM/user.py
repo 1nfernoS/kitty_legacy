@@ -61,18 +61,18 @@ class User(Base):
     __tablename__ = 'users'
     
     user_id: Mapped[int] = mapped_column(primary_key=True)
-    class_id: Mapped[int]
-    stat_level: Mapped[int]
-    stat_attack: Mapped[int]
-    stat_defence: Mapped[int]
-    stat_strength: Mapped[int]
-    stat_agility: Mapped[int]
-    stat_endurance: Mapped[int]
-    stat_luck: Mapped[int]
-    stat_accuracy: Mapped[int]
-    stat_concentration: Mapped[int]
-    update_profile: Mapped[datetime]
-    role_name: Mapped[str] = mapped_column(ForeignKey('role.name'))
+    class_id: Mapped[int] = mapped_column(default=None, nullable=True)
+    stat_level: Mapped[int] = mapped_column(default=0)
+    stat_attack: Mapped[int] = mapped_column(default=0)
+    stat_defence: Mapped[int] = mapped_column(default=0)
+    stat_strength: Mapped[int] = mapped_column(default=0)
+    stat_agility: Mapped[int] = mapped_column(default=0)
+    stat_endurance: Mapped[int] = mapped_column(default=0)
+    stat_luck: Mapped[int] = mapped_column(default=0)
+    stat_accuracy: Mapped[int] = mapped_column(default=0)
+    stat_concentration: Mapped[int] = mapped_column(default=0)
+    update_profile: Mapped[datetime] = mapped_column(default=now())
+    role_name: Mapped[str] = mapped_column(ForeignKey('role.name'), default='other')
     profile_key: Mapped[str] = mapped_column(String(32), nullable=True)
     balance: Mapped[int] = mapped_column(default=0)
     update_balance: Mapped[datetime] = mapped_column(default=now())
