@@ -97,7 +97,7 @@ class __Equipment(Base):
 @event.listens_for(Role.__table__, 'after_create')
 def default_roles(*a, **kw):
     with session() as s:
-        s.add(Role(name="creator", alias="Создатель",
+        s.add(Role(name="creator", alias="создатель",
                    bot_access=True,
                    admin_utils=True,
                    moderator=True,
@@ -113,7 +113,7 @@ def default_roles(*a, **kw):
                    stats_access=True
                    ))
               
-        s.add(Role(name="leader", alias="Лидер",
+        s.add(Role(name="leader", alias="лидер",
                    bot_access=True,
                    admin_utils=False,
                    moderator=True,
@@ -129,7 +129,7 @@ def default_roles(*a, **kw):
                    stats_access=True
                    ))
         
-        s.add(Role(name="captain", alias="Капитан",
+        s.add(Role(name="captain", alias="капитан",
                    bot_access=True,
                    admin_utils=False,
                    moderator=True,
@@ -145,7 +145,7 @@ def default_roles(*a, **kw):
                    stats_access=True
                    ))
         
-        s.add(Role(name="officer", alias="Офицер",
+        s.add(Role(name="officer", alias="офицер",
                    bot_access=True,
                    admin_utils=False,
                    moderator=True,
@@ -161,7 +161,7 @@ def default_roles(*a, **kw):
                    stats_access=True
                    ))
         
-        s.add(Role(name="guild", alias="Согильдиец",
+        s.add(Role(name="guild", alias="согильдиец",
                    bot_access=True,
                    admin_utils=False,
                    moderator=False,
@@ -176,7 +176,7 @@ def default_roles(*a, **kw):
                    take_buffs=True,
                    stats_access=True))
         
-        s.add(Role(name="newbie", alias="Новичок",
+        s.add(Role(name="newbie", alias="новичок",
                    bot_access=True,
                    admin_utils=False,
                    moderator=False,
@@ -191,7 +191,7 @@ def default_roles(*a, **kw):
                    take_buffs=True,
                    stats_access=True))
         
-        s.add(Role(name="guest", alias="Гость гильдии",
+        s.add(Role(name="guest", alias="гость гильдии",
                    bot_access=True,
                    admin_utils=False,
                    moderator=False,
@@ -206,7 +206,7 @@ def default_roles(*a, **kw):
                    take_buffs=True,
                    stats_access=True))
         
-        s.add(Role(name="other", alias="Неизвестный",
+        s.add(Role(name="other", alias="неизвестный",
                    bot_access=True,
                    admin_utils=False,
                    moderator=False,
@@ -221,7 +221,7 @@ def default_roles(*a, **kw):
                    take_buffs=False,
                    stats_access=False))
         
-        s.add(Role(name="blacklist", alias="Бан",
+        s.add(Role(name="blacklist", alias="бан",
                    bot_access=False,
                    admin_utils=False,
                    moderator=False,
