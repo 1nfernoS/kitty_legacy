@@ -48,4 +48,15 @@ async def pure(msg: MessageMin, money: int):
         await msg.answer(commission_price(int(money)))
     except ValueError:
         return
-        
+
+
+@labeler.message(AccessRule(RoleAccess.admin_utils), text=['обнови предметы <start> <end>',
+                                                           'update items <start> <end>',
+                                                           'обновить предметы <start> <end>'])
+async def update_items(msg: MessageMin, start: int, end: int):
+    try:
+        start = int(start)
+        end = int(end)
+    except ValueError:
+        return
+    await msg.answer('Не прописан парсер колодца, работаем над этим...')
