@@ -1,6 +1,8 @@
 pip>=24.0
+requests~=2.31.0
 python-dotenv~=1.0.0
 loguru~=0.7.2
 mariadb~=1.1.9
 SQLAlchemy~=2.0.0
 vkbottle~=4.3.12
+beautifulsoup4~=4.12.3

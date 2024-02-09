@@ -27,6 +27,9 @@ IGNORE_LIST: Tuple[int, ...] = (PIT_BOT, OVERSEER_BOT, *[int(i) for i in env.get
 GUILD_NAME: str = env.get('GUILD_NAME')
 GUILD_CHAT_ID: int = int(env.get('GUILD_CHAT_ID'))
 
+PROFILE_KEY: str = env.get('PROFILE_KEY')
+PROFILE_ID: int = int(env.get('PROFILE_ID'))
+
 DISCOUNT_PERCENT: int = int(env.get('PERCENT_DISCOUNT'))
 
 NOTE_RULES: str = env.get('NOTE_RULES')
