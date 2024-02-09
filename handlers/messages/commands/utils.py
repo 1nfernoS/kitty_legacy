@@ -8,6 +8,7 @@ from bot_engine.rules import AccessRule
 from ORM import session, User, Role
 
 from data_typings.enums import RoleAccess
+from utils.math import pure_price, commission_price
 
 
 @labeler.message(AccessRule(RoleAccess.bot_access), text=['ping', 'пинг'])
@@ -31,3 +32,31 @@ async def role(msg: MessageMin):
             user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
         user_role: Role = user.user_role
     await msg.answer(f'Ваша роль - {user_role.alias.capitalize()}')
+
+
+@labeler.message(AccessRule(RoleAccess.bot_access), text=['грязными <money>', 'dirty <money>'])
+async def dirty(msg: MessageMin, money: int):
+    try:
+        await msg.answer(pure_price(int(money)))
+    except ValueError:
+        return
+
+
+@labeler.message(AccessRule(RoleAccess.bot_access), text=['чистыми <money>', 'pure <money>'])
+async def pure(msg: MessageMin, money: int):
+    try:
+        await msg.answer(commission_price(int(money)))
+    except ValueError:
+        return
+
+
+@labeler.message(AccessRule(RoleAccess.admin_utils), text=['обнови предметы <start> <end>',
+                                                           'update items <start> <end>',
+                                                           'обновить предметы <start> <end>'])
+async def update_items(msg: MessageMin, start: int, end: int):
+    try:
+        start = int(start)
+        end = int(end)
+    except ValueError:
+        return
+    await msg.answer('Не прописан парсер колодца, работаем над этим...')

@@ -25,6 +25,10 @@ class WhiteListRule(ABCRule[BaseMessageMin]):
 
 
 class AccessRule(ABCRule[BaseMessageMin]):
+    """
+    Rule to check access type for user's role
+    return Role access
+    """
     def __init__(self, require_access: RoleAccess):
         self.require = require_access.value
         return
