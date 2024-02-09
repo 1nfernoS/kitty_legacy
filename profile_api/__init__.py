@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from config import PROFILE_KEY, PROFILE_ID
 
 from data_typings.profile import Skill, Skills, Stats, Profile
+from data_typings.items import (buff_classes, equipped_to_ordinary_active, races,
+                                equipped_to_ordinary_passive, adm_to_ordinary_books)
 
 __url = 'https://vip3.activeusers.ru/app.php'
 __params = {
@@ -74,18 +76,37 @@ def _inv(auth_key: str, user_id: int) -> List[int]:
 def get_profile(auth: str, id_vk: int) -> Profile:
     return {'items': _inv(auth, id_vk), 'stats': _stats(auth, id_vk)}
 
+
+def get_buff_class(auth_key: str, user_id: int) -> int | None:
+    for val in _inv(auth_key, user_id):
+        if val in buff_classes:
+            return val
+    return None
+
+
+def get_books(item_list: List[int]) -> List[int]:
+    __BOOK_LIST = equipped_to_ordinary_active.copy()
+    __BOOK_LIST.update(equipped_to_ordinary_passive.copy())
+    __ADM_DICT = adm_to_ordinary_books.copy()
+    res = list()
+    for item in item_list:
+        if item in __BOOK_LIST.keys():
+            res.append(__BOOK_LIST[item])
+        if item in __ADM_DICT.keys():
+            res += __ADM_DICT[item]
+    return res
+
+def get_races(auth_key: str, user_id: int) -> List[int]:
+    return [val for val in _inv(auth_key, user_id) if val in races]
+
 #
-# def get_books(item_list: list) -> list:
-#     __BOOK_LIST = items.equipped_to_ordinary_active.copy()
-#     __BOOK_LIST.update(items.equipped_to_ordinary_passive.copy())
-#     __ADM_DICT = items.adm_to_ordinary_books.copy()
-#     res = list()
-#     for item in item_list:
-#         if item in __BOOK_LIST.keys():
-#             res.append(__BOOK_LIST[item])
-#         if item in __ADM_DICT.keys():
-#             res += __ADM_DICT[item]
-#     return res
+# def get_voices(auth_key: str, user_id: int) -> int:
+#     url = f"https://vip3.activeusers.ru/app.php?act=item&id=14264&auth_key={auth_key}&viewer_id={user_id}&group_id=182985865&api_id=7055214"
+#
+#     soup = BeautifulSoup(requests.get(url).content, 'html.parser')
+#     voices = soup.find_all('h4')[0].text
+#     import re
+#     return int(re.findall(r'\d+(?=/\d+)', voices)[0])
 #
 #
 # def get_build(item_list: list) -> dict:
@@ -98,26 +119,6 @@ def get_profile(auth: str, id_vk: int) -> Profile:
 #         if item in __ADM_DICT.keys():
 #             res['adms'] += __ADM_DICT[item]
 #     return res
-#
-#
-# def get_buff_class(auth_key: str, user_id: int) -> int:
-#     for val in _inv(auth_key, user_id):
-#         if val in [14088, 14093, 14256, 14257, 14264]:  # class ids
-#             return val
-#     return None
-#
-#
-# def get_races(auth_key: str, user_id: int) -> List[int]:
-#     return [val for val in _inv(auth_key, user_id) if val in items.races]
-#
-#
-# def get_voices(auth_key: str, user_id: int) -> int:
-#     url = f"https://vip3.activeusers.ru/app.php?act=item&id=14264&auth_key={auth_key}&viewer_id={user_id}&group_id=182985865&api_id=7055214"
-#
-#     soup = BeautifulSoup(requests.get(url).content, 'html.parser')
-#     voices = soup.find_all('h4')[0].text
-#     import re
-#     return int(re.findall(r'\d+(?=/\d+)', voices)[0])
 #
 #
 # def price(item: int) -> int:
