@@ -1,11 +1,11 @@
-import typing as t
+from typing import TypedDict, Optional
 
 
-class DbData(t.TypedDict):
+class DbData(TypedDict):
     user: str
     password: str
     host: str
     database: str
     dialect: str
     connector: str
-    port: t.Optional[int]
+    port: Optional[int]
