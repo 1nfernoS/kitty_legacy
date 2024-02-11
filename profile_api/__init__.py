@@ -96,18 +96,19 @@ def get_books(item_list: List[int]) -> List[int]:
             res += __ADM_DICT[item]
     return res
 
+
 def get_races(auth_key: str, user_id: int) -> List[int]:
     return [val for val in _inv(auth_key, user_id) if val in races]
 
-#
-# def get_voices(auth_key: str, user_id: int) -> int:
-#     url = f"https://vip3.activeusers.ru/app.php?act=item&id=14264&auth_key={auth_key}&viewer_id={user_id}&group_id=182985865&api_id=7055214"
-#
-#     soup = BeautifulSoup(requests.get(url).content, 'html.parser')
-#     voices = soup.find_all('h4')[0].text
-#     import re
-#     return int(re.findall(r'\d+(?=/\d+)', voices)[0])
-#
+
+def get_voices(auth_key: str, user_id: int, class_id: int = 14264) -> int:
+
+    soup = __get_soup(act='item', auth_key=auth_key, viewer_id=user_id, id=class_id)
+    
+    voices = soup.find_all('h4')[0].text
+    import re
+    return int(re.findall(r'\d+(?=/\d+)', voices)[0])
+
 #
 # def get_build(item_list: list) -> dict:
 #     __BOOK_LIST = items.equipped_books_active + items.equipped_books_passive
