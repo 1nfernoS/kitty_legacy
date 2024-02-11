@@ -22,7 +22,7 @@ if not load_dotenv('.env'):
 
 
 # id's of users in chat but not in guild (bots, guests, etc.)
-IGNORE_LIST: Tuple[int, ...] = (PIT_BOT, OVERSEER_BOT, *[int(i) for i in env.get('IGNORE').split(',') if i])
+# IGNORE_LIST: Tuple[int, ...] = (PIT_BOT, OVERSEER_BOT, *[int(i) for i in env.get('IGNORE').split(',') if i])
 
 GUILD_NAME: str = env.get('GUILD_NAME')
 GUILD_CHAT_ID: int = int(env.get('GUILD_CHAT_ID'))
