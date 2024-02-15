@@ -25,3 +25,8 @@ class Stats(TypedDict):
 class Profile(TypedDict):
     stats: Stats
     items: List[int]
+
+
+class Build(TypedDict):
+    books: List[int]
+    adms: List[int]
