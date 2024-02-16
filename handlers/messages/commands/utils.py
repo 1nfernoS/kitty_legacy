@@ -38,10 +38,6 @@ async def other_role(msg: MessageMin):
 async def role(msg: MessageMin):
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
-        if not user:
-            s.add(User(user_id=msg.from_id))
-            s.commit()
-            user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
         user_role: Role = user.user_role
     await msg.answer(f'Ваша роль - {user_role.alias.capitalize()}')
 
