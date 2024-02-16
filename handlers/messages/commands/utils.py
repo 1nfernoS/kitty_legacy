@@ -3,7 +3,7 @@ from typing import List
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 from bot_engine import labeler
-from bot_engine.rules import AccessRule
+from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
 from ORM import session, User, Role
 
@@ -20,6 +20,18 @@ async def ping(msg: MessageMin):
                           "Добрый день", "Добрый вечер", "Провел проверки, все работает", "Мяу", "Мяу :3", ":3",
                           "М-р-р-р-р"]
     await msg.answer(choice(answers))
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
+async def other_role(msg: MessageMin):
+    if msg.reply_message:
+        user_id = msg.reply_message.from_id
+    if msg.fwd_messages:
+        user_id = msg.fwd_messages[0].from_id
+    with session() as s:
+        user: User | None = s.query(User).filter(User.user_id == user_id).first()
+        user_role: Role = user.user_role
+    await msg.answer(f'Роль пользователя - {user_role.alias.capitalize()}')
 
 
 @labeler.message(AccessRule(RoleAccess.bot_access), text=['role', 'роль'])
