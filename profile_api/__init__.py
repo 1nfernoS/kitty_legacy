@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from config import PROFILE_KEY, PROFILE_ID
 
 
-__url = 'http://vip3.activeusers.ru/app.php'
+__url = 'https://vip3.activeusers.ru/app.php'
 __params = {
     'group_id': 182985865,
     'api_id': 7055214,
