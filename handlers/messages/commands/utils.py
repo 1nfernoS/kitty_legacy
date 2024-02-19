@@ -24,10 +24,7 @@ async def ping(msg: MessageMin):
 
 @labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
 async def other_role(msg: MessageMin):
-    if msg.reply_message:
-        user_id = msg.reply_message.from_id
-    if msg.fwd_messages:
-        user_id = msg.fwd_messages[0].from_id
+    user_id = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == user_id).first()
         user_role: Role = user.user_role
