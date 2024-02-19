@@ -78,7 +78,7 @@ class User(Base):
     update_balance: Mapped[datetime] = mapped_column(default=now())
     
     user_items: Mapped[List["Item"]] = relationship(secondary='equipment', back_populates='item_users')
-    user_role: Mapped["Role"] = relationship(back_populates='role_users', viewonly=True)
+    user_role: Mapped["Role"] = relationship(back_populates='role_users', viewonly=True, lazy='immediate')
     
     def __repr__(self):
         return f'<User {self.user_id} ({self.role_name})>'
