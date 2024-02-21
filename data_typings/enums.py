@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum, auto, IntEnum
 
 
 class RoleAccess(Enum):
@@ -38,3 +38,16 @@ class ChangeMoneyAction(Enum):
     ADD = auto()
     SUB = auto()
     SET = auto()
+
+class Roles(IntEnum):
+    creator = 0
+    leader = 1
+    captain = 2
+    officer = 3
+    guild = 4
+    newbie = 5
+    guest = 6
+    other = 7
+    blacklist = 8
+
+
