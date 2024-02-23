@@ -39,6 +39,7 @@ class ChangeMoneyAction(Enum):
     SUB = auto()
     SET = auto()
 
+
 class Roles(IntEnum):
     creator = 0
     leader = 1
@@ -49,5 +50,3 @@ class Roles(IntEnum):
     guest = 6
     other = 7
     blacklist = 8
-
-

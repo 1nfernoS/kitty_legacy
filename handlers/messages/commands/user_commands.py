@@ -13,8 +13,8 @@ from data_typings.enums import RoleAccess, Roles
 from utils.math import commission_price
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access), text=['баланс', 'счет', 'счёт', 'balance',
-                                                                                    'wallet'])
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
+                 text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
 async def other_balance(msg: MessageMin):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     with session() as s:
@@ -37,8 +37,8 @@ async def balance(msg: MessageMin):
     return await msg.answer(message)
 
 
-@labeler.message(AccessRule(RoleAccess.change_balance), text=['баланс все', 'счет все', 'счёт все', 'balance all',
-                                                              'wallet all'])
+@labeler.message(AccessRule(RoleAccess.change_balance),
+                 text=['баланс все', 'счет все', 'счёт все', 'balance all', 'wallet all'])
 async def all_balance(msg: MessageMin):
     guild_roles = (Roles.creator, Roles.leader, Roles.captain, Roles.officer, Roles.guild, Roles.newbie)
     with session() as s:
