@@ -57,3 +57,21 @@ async def ban_user(msg: MessageMin):
     await api.messages.remove_chat_user(msg.chat_id, target_id)
     
     return await msg.answer(f"@id{target_id} успешно кикнут!")
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance), text=['чек <value>', 'check <value>'])
+async def change_balance(msg: MessageMin, value: int):
+    try:
+        value = int(value)
+    except ValueError:
+        return await msg.answer("Что-то не то, это не число")
+    
+    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    with session() as s:
+        target_user: User | None = s.query(User).filter(User.user_id == target_id).first()
+        target_user.balance += value
+        s.add(target_user)
+        s.commit()
+
+        return await msg.answer(f"Готово, изменил баланс на {value}\n"
+                                f"На счету игрока: {target_user.balance}")
