@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import or_
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
-from bot_engine import labeler
+from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
 from ORM import session, Role, User
@@ -33,3 +33,45 @@ async def change_role(msg: MessageMin, name: str):
         s.commit()
 
         return await msg.answer(f"Теперь пользователь имеет права {new_role.alias.capitalize()}")
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator), text=['kick', 'кик'])
+async def ban_user(msg: MessageMin):
+    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    if target_id == msg.from_id:
+        return await msg.answer(f"нельзя кикнуть самого себя!")
+
+    with session() as s:
+        user_role: Role | None = s.query(Role).filter(Role.role_users.any(User.user_id == msg.from_id)).first()
+        target_role: Role | None = s.query(Role).filter(Role.role_users.any(User.user_id == target_id)).first()
+        if getattr(Roles, user_role.name) >= getattr(Roles, target_role.name):
+            return await msg.answer(f'Ваша роль {user_role.alias} ниже или равна '
+                                    f'роли {target_role.alias}, нельзя исключить')
+        target_user: User | None = s.query(User).filter(User.user_id == target_id).first()
+        if target_user:
+            new_role: Role | None = s.query(Role).filter(Role.name == Roles.blacklist.name).first()
+            target_user.role_name = new_role.name
+            s.add(target_user)
+            s.commit()
+
+    await api.messages.remove_chat_user(msg.chat_id, target_id)
+    
+    return await msg.answer(f"@id{target_id} успешно кикнут!")
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance), text=['чек <value>', 'check <value>'])
+async def change_balance(msg: MessageMin, value: int):
+    try:
+        value = int(value)
+    except ValueError:
+        return await msg.answer("Что-то не то, это не число")
+    
+    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    with session() as s:
+        target_user: User | None = s.query(User).filter(User.user_id == target_id).first()
+        target_user.balance += value
+        s.add(target_user)
+        s.commit()
+
+        return await msg.answer(f"Готово, изменил баланс на {value}\n"
+                                f"На счету игрока: {target_user.balance}")
