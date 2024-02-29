@@ -37,7 +37,7 @@ async def _item_price_base(msg: MessageMin, item: str, count: int = 1) -> Messag
         answer += f"\n{auc_price if count == 1 else auc_price * count} "
         answer += f"[-{DISCOUNT_PERCENT}%:{guild_price if count == 1 else guild_price * count} "
         answer += f"({guild_commission_price if count == 1 else guild_commission_price * count})] "
-        answer += f"{i.name}"
+        answer += f"{i.name}" if count == 1 else f"{count}*{i.name}"
         cnt += 1
 
     answer = f"Нашел следующее:" + answer if cnt > 0 else 'Ничего не нашлось...'
