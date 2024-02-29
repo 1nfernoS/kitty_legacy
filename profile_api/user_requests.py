@@ -6,10 +6,10 @@ from data_typings.profile import Skill, Skills, Stats, Profile
 from data_typings.items import buff_classes, races
 
 
-def lvl_skills(auth_key: str, user_id: int) -> Skills:
+async def lvl_skills(auth_key: str, user_id: int) -> Skills:
     import re
 
-    soup = _get_soup(act='pages', id=702, auth_key=auth_key, viewer_id=user_id)
+    soup = await _get_soup(act='pages', id=702, auth_key=auth_key, viewer_id=user_id)
 
     a = soup.body.find_all('div', {'class': 'element-box'})[0]
     active, passive = a.find_all('p')
@@ -24,8 +24,8 @@ def lvl_skills(auth_key: str, user_id: int) -> Skills:
     return {'active': a_level, 'passive': p_level}
 
 
-def _stats(auth_key: str, user_id: int) -> Stats:
-    soup = _get_soup(act='user', auth_key=auth_key, viewer_id=user_id)
+async def _stats(auth_key: str, user_id: int) -> Stats:
+    soup = await _get_soup(act='user', auth_key=auth_key, viewer_id=user_id)
 
     stat = []
     for i in soup.body.find_all('span', class_='money-list-rescount'):
@@ -35,29 +35,29 @@ def _stats(auth_key: str, user_id: int) -> Stats:
                   'luck': stat[6], 'accuracy': stat[7], 'concentration': stat[8]}
     return res
 
-def _inv(auth_key: str, user_id: int) -> List[int]:
-    soup = _get_soup(act='user', auth_key=auth_key, viewer_id=user_id)
+async def _inv(auth_key: str, user_id: int) -> List[int]:
+    soup = await _get_soup(act='user', auth_key=auth_key, viewer_id=user_id)
 
     t1 = soup.body.find_all('div', class_='resitems items clearfix')[2]
 
     return [int(i['class'][1][1:]) for i in t1.find_all('a')]
 
 
-def get_profile(auth: str, id_vk: int) -> Profile:
-    return {'items': _inv(auth, id_vk), 'stats': _stats(auth, id_vk)}
+async def get_profile(auth: str, id_vk: int) -> Profile:
+    return {'items': await _inv(auth, id_vk), 'stats': await _stats(auth, id_vk)}
 
 
-def get_buff_class(auth_key: str, user_id: int) -> int | None:
-    for val in _inv(auth_key, user_id):
+async def get_buff_class(auth_key: str, user_id: int) -> int | None:
+    for val in await _inv(auth_key, user_id):
         if val in buff_classes:
             return val
     return None
 
-def get_player_races(auth_key: str, user_id: int) -> List[int]:
-    return [val for val in _inv(auth_key, user_id) if val in races]
+async def get_player_races(auth_key: str, user_id: int) -> List[int]:
+    return [val for val in await _inv(auth_key, user_id) if val in races]
 
-def get_buffer_voices(auth_key: str, user_id: int, class_id: int = 14264) -> int:
-    soup = _get_soup(act='item', auth_key=auth_key, viewer_id=user_id, id=class_id)
+async def get_buffer_voices(auth_key: str, user_id: int, class_id: int = 14264) -> int:
+    soup = await _get_soup(act='item', auth_key=auth_key, viewer_id=user_id, id=class_id)
 
     voices = soup.find_all('h4')[0].text
     import re

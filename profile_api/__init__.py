@@ -1,6 +1,6 @@
 import json
 
-import requests
+import aiohttp
 
 from bs4 import BeautifulSoup
 
@@ -17,24 +17,27 @@ __params = {
 }
 
 
-def _get_soup(**params) -> BeautifulSoup:
+async def _get_soup(**params) -> BeautifulSoup:
     __params.update(params)
-    soup = BeautifulSoup(requests.get(__url, __params).content, 'html.parser')
+    async with aiohttp.ClientSession() as session:
+        async with session.get(__url, params=__params) as response:
+            result = await response.content.read()
+    soup = BeautifulSoup(result, 'html.parser')
     __params.update({'auth_key': PROFILE_KEY, 'viewer_id': PROFILE_ID})
     return soup
 
 
-def get_name(item_id: int) -> str:
-    soup = _get_soup(act='item', id=item_id)
+async def get_name(item_id: int) -> str:
+    soup = await _get_soup(act='item', id=item_id)
     try:
         return soup.find_all('div', class_='shop_res-title')[0].contents[0].strip()
     except:
         return ''
 
 
-def get_price(item_id: int) -> int:
+async def get_price(item_id: int) -> int:
 
-    soup = _get_soup(act='item', id=item_id)
+    soup = await _get_soup(act='item', id=item_id)
 
     try:
         t1 = soup.body
