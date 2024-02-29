@@ -35,7 +35,13 @@ class AccessRule(ABCRule[BaseMessageMin]):
         with session() as s:
             user: User | None = s.query(User).filter(User.user_id == event.from_id).first()
             role: Role = user.user_role
-            return getattr(role, self.require)
+            result = getattr(role, self.require)
+        if self.require == RoleAccess.profile_app:
+            message = "Сдайте ссылку на профиль мне в лс!\n" \
+                      "Проще всего это сделать через сайт, скопировав адрес ссылки кнопки 'Профиль' в приложении.\n" \
+                      "Если получилась ссылка формата 'https:// vip3.activeusers .ru/блаблабла', то все получится)"
+            await event.answer(message)
+        return result
 
 
 class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
