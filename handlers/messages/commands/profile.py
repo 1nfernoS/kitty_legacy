@@ -67,7 +67,7 @@ async def item_price(msg: MessageMin, item: str):
 
 
 @labeler.message(AccessRule(RoleAccess.profile_app), text=['билд', 'build', 'экип', 'equip'])
-async def item_price(msg: MessageMin):
+async def get_build(msg: MessageMin):
     msg_to_edit = await msg.answer('Поднимаю записи...')
 
     with session() as s:
