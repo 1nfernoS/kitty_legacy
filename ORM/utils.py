@@ -49,7 +49,7 @@ class Notes(Base):
     expires_in: Mapped[datetime]
     is_active: Mapped[bool]
 
-    def __init__(self, author: int, text: str, expires: datetime = datetime.utcnow() + timedelta(hours=168 + TZ),
+    def __init__(self, author: int, text: str, expires: datetime = now() + timedelta(hours=168),
                  active: bool = True):
         self.note_author = author
         self.note_text = text
@@ -64,7 +64,7 @@ class Notes(Base):
 
     def restore(self):
         self.is_active = True
-        self.expires_in = datetime.utcnow() + timedelta(hours=168+3)
+        self.expires_in = now() + timedelta(hours=168)
         self.save()
         return
 

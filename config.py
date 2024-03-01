@@ -21,9 +21,6 @@ if not load_dotenv('.env'):
     raise EnvironmentError('No .env file')
 
 
-# id's of users in chat but not in guild (bots, guests, etc.)
-# IGNORE_LIST: Tuple[int, ...] = (PIT_BOT, OVERSEER_BOT, *[int(i) for i in env.get('IGNORE').split(',') if i])
-
 GUILD_NAME: str = env.get('GUILD_NAME')
 GUILD_CHAT_ID: int = int(env.get('GUILD_CHAT_ID'))
 
@@ -53,6 +50,7 @@ ERROR_CHAT_ID: int
 
 group_token: str
 db_data: DbData
+
 # whitelist of chat id's for bot_engine to listen
 ALLOWED_CHATS: Tuple[int, ...]
 

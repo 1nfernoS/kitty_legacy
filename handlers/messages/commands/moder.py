@@ -39,7 +39,7 @@ async def change_role(msg: MessageMin, name: str):
 async def ban_user(msg: MessageMin):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     if target_id == msg.from_id:
-        return await msg.answer(f"нельзя кикнуть самого себя!")
+        return await msg.answer(f"Нельзя кикнуть самого себя!")
 
     with session() as s:
         user_role: Role | None = s.query(Role).filter(Role.role_users.any(User.user_id == msg.from_id)).first()

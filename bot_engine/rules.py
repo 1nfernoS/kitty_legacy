@@ -51,6 +51,7 @@ class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
     def __init__(self, allow_self: bool = True):
         self.allow_self = allow_self
         return
+
     async def check(self, event: BaseMessageMin) -> bool:
         if event.reply_message:
             check_self = event.reply_message.from_id == event.from_id if not self.allow_self else True

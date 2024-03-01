@@ -6,7 +6,7 @@ from vkbottle import Keyboard, KeyboardButtonColor, OpenLink
 from bot_engine import labeler
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
-from ORM import session, User, Role
+from ORM import session, User
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
 
