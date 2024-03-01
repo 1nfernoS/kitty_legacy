@@ -51,7 +51,8 @@ async def _item_price_base(msg: MessageMin, item: str, count: int = 1) -> Messag
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['цена <item> - <count>', 'price <item> - <count>'])
+@labeler.message(AccessRule(RoleAccess.bot_access),
+                 text=['цена <item:str> - <count:int>', 'price <item:str> - <count:int>'])
 async def item_price_many(msg: MessageMin, item: str, count: int):
     try:
         count = int(count)
@@ -60,7 +61,7 @@ async def item_price_many(msg: MessageMin, item: str, count: int):
     return await _item_price_base(msg, item, count)
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['цена <item>', 'price <item>'])
+@labeler.message(AccessRule(RoleAccess.bot_access), text=['цена <item:str>', 'price <item:str>'])
 async def item_price(msg: MessageMin, item: str):
     return await _item_price_base(msg, item)
 

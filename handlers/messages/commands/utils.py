@@ -39,7 +39,7 @@ async def role(msg: MessageMin):
     await msg.answer(f'Ваша роль - {user_role.alias.capitalize()}')
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['грязными <money>', 'dirty <money>'])
+@labeler.message(AccessRule(RoleAccess.bot_access), text=['грязными <money:int>', 'dirty <money:int>'])
 async def dirty(msg: MessageMin, money: int):
     try:
         await msg.answer(pure_price(int(money)))
@@ -47,7 +47,7 @@ async def dirty(msg: MessageMin, money: int):
         return
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['чистыми <money>', 'pure <money>'])
+@labeler.message(AccessRule(RoleAccess.bot_access), text=['чистыми <money:int>', 'pure <money:int>'])
 async def pure(msg: MessageMin, money: int):
     try:
         await msg.answer(commission_price(int(money)))
@@ -56,9 +56,9 @@ async def pure(msg: MessageMin, money: int):
 
 
 @labeler.message(AccessRule(RoleAccess.admin_utils),
-                 text=['обнови предметы <start> <end>',
-                       'update items <start> <end>',
-                       'обновить предметы <start> <end>'])
+                 text=['обнови предметы <start:int> <end:int>',
+                       'update items <start:int> <end:int>',
+                       'обновить предметы <start:int> <end:int>'])
 async def update_items(msg: MessageMin, start: int, end: int):
     try:
         start = int(start)

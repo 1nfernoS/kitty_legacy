@@ -11,7 +11,7 @@ from ORM import session, Role, User
 from data_typings.enums import RoleAccess, Roles
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name>', 'роль <name>'])
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])
 async def change_role(msg: MessageMin, name: str):
     name = name.lower()
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
