@@ -48,9 +48,14 @@ class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
     """
     Rule to check if message has Forward or Reply from user
     """
+    def __init__(self, allow_self: bool = True):
+        self.allow_self = allow_self
+        return
     async def check(self, event: BaseMessageMin) -> bool:
         if event.reply_message:
-            return event.reply_message.from_id > 0
+            check_self = event.reply_message.from_id == event.from_id if not self.allow_self else True
+            return event.reply_message.from_id > 0 and check_self
         if event.fwd_messages:
-            return event.fwd_messages[0].from_id > 0
+            check_self = event.fwd_messages[0].from_id == event.from_id if not self.allow_self else True
+            return event.fwd_messages[0].from_id > 0 and check_self
         return False
