@@ -96,4 +96,3 @@ async def change_balance(msg: MessageMin, value: int):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     answer = _change_balance(target_id, value, 'change')
     return await msg.answer(answer)
-

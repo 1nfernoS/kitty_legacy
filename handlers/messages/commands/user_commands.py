@@ -1,13 +1,14 @@
 from typing import List
 
 from vkbottle.tools.dev.mini_types.bot import MessageMin
+from vkbottle import Keyboard, KeyboardButtonColor, OpenLink
 
 from bot_engine import labeler
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
 from ORM import session, User
 
-from config import GUILD_NAME
+from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
 
 from data_typings.enums import RoleAccess, Roles
 from utils.math import commission_price
@@ -49,3 +50,12 @@ async def all_balance(msg: MessageMin):
     for user in users:
         message += f"\n@id{user.user_id}: {user.balance}"
     return await msg.answer(message)
+
+
+@labeler.message(AccessRule(RoleAccess.bot_access),
+                 text=['заметки', 'rules', 'notes', 'правила'])
+async def change_balance(msg: MessageMin):
+    kbd = Keyboard(inline=True)
+    kbd.add(OpenLink(NOTE_RULES, 'Правила'), KeyboardButtonColor.SECONDARY)
+    kbd.add(OpenLink(NOTE_ALL, 'Все заметки'), KeyboardButtonColor.SECONDARY)
+    return await msg.answer('Заметки:', keyboard=kbd.get_json())
