@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 
 from sqlalchemy import or_
 from vkbottle.tools.dev.mini_types.bot import MessageMin
@@ -59,19 +59,41 @@ async def ban_user(msg: MessageMin):
     return await msg.answer(f"@id{target_id} успешно кикнут!")
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance), text=['чек <value>', 'check <value>'])
-async def change_balance(msg: MessageMin, value: int):
+def _change_balance(target_id: int, value: int, action: Literal['change', 'set']) -> str:
     try:
         value = int(value)
     except ValueError:
-        return await msg.answer("Что-то не то, это не число")
-    
-    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+        return 'Это не число (можно использовать + или - и число'
+
     with session() as s:
-        target_user: User | None = s.query(User).filter(User.user_id == target_id).first()
-        target_user.balance += value
-        s.add(target_user)
+        user: User | None = s.query(User).filter(User.user_id == target_id).first()
+        if not user:
+            return 'Этого игрока нет в моих записях, пусть напишет что-нибудь'
+        if not user.user_role.balance_access:
+            return 'У игрока нет баланса, пусть вступит гильдию или получит другую роль'
+        if action == 'change':
+            user.balance += value
+        elif action == 'set':
+            user.balance = value
+        balance = user.balance
+        s.add(user)
         s.commit()
 
-        return await msg.answer(f"Готово, изменил баланс на {value}\n"
-                                f"На счету игрока: {target_user.balance}")
+    return f"Готово, изменил баланс на {value}\nНа счету игрока: {balance}"
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
+                 text=['чек = <value>', 'check = <value>'])
+async def set_balance(msg: MessageMin, value: int):
+    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    answer = _change_balance(target_id, value, 'set')
+    return await msg.answer(answer)
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
+                 text=['чек <value>', 'check <value>'])
+async def change_balance(msg: MessageMin, value: int):
+    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    answer = _change_balance(target_id, value, 'change')
+    return await msg.answer(answer)
+
