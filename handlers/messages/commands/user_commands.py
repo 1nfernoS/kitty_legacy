@@ -12,6 +12,7 @@ from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
 
 from data_typings.enums import RoleAccess, Roles
 from data_typings.emoji import gold
+from utils.formatters import format_name
 from utils.math import commission_price
 
 
@@ -49,7 +50,7 @@ async def all_balance(msg: MessageMin):
         return await msg.answer('Нет данных')
     message = f"Баланс участников гильдии {GUILD_NAME}:"
     for user in users:
-        message += f"\n@id{user.user_id}: {user.balance}{gold}"
+        message += f"\n{await format_name(user.user_id, 'nom')}: {user.balance}{gold}"
     try:
         await api.messages.send(msg.from_id, 0, message=message)
     except VKAPIError[902, 901]:

@@ -7,7 +7,7 @@ from config import DISCOUNT_PERCENT
 from data_typings.enums import RoleAccess
 from data_typings.emoji import gold, tab
 from utils.math import commission_price, discount_price
-from utils.formatters import format_profile_skills
+from utils.formatters import format_profile_skills, format_name
 
 from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
@@ -87,8 +87,7 @@ async def _get_build(user_id: int) -> str:
                            for i in books]
         s.add(user)
         s.commit()
-    user_name = await api.users.get(user_id, name_case="gen")
-    user_name = f"[id{user_name[0].id}|{user_name[0].first_name}]"
+    user_name = await format_name(user_id)
     message = f'Билд {user_name}:'
     if build['books']:
         message += '\nКниги:'

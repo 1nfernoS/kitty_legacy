@@ -1,4 +1,7 @@
+from typing import Literal
+
 from ORM import session, Item
+from bot_engine import api
 from data_typings.profile import Skills
 from data_typings.emoji import tab, active_book, passive_book
 
@@ -23,3 +26,8 @@ def format_profile_skills(item_list: list, skills: Skills) -> str:
             message += f" - {lvl[0]} ({(round((int(lvl[0]) / 10) ** 0.5 * 10) + 100)}%)"
     s.close()
     return message
+
+
+async def format_name(user_id: int, case: Literal["nom", "gen", "dat", "acc", "ins", "abl"] = 'gen') -> str:
+    user = await api.users.get(user_id, name_case=case)
+    return f"[id{user[0].id}|{user[0].first_name}]"
