@@ -1,9 +1,9 @@
 from typing import List
 
 from vkbottle.tools.dev.mini_types.bot import MessageMin
-from vkbottle import Keyboard, KeyboardButtonColor, OpenLink
+from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError
 
-from bot_engine import labeler
+from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
 from ORM import session, User
@@ -49,7 +49,11 @@ async def all_balance(msg: MessageMin):
     message = f"Баланс участников гильдии {GUILD_NAME}:"
     for user in users:
         message += f"\n@id{user.user_id}: {user.balance}"
-    return await msg.answer(message)
+    try:
+        await api.messages.send(msg.from_id, 0, message=message)
+    except VKAPIError[902, 901]:
+        return await msg.answer('Разрешите  мне писать вам сообщения или просто напишите мне что-нибудь')
+    return await msg.answer('Отправил список в лс')
 
 
 @labeler.message(AccessRule(RoleAccess.bot_access),
