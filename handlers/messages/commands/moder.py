@@ -9,6 +9,7 @@ from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 from ORM import session, Role, User
 
 from data_typings.enums import RoleAccess, Roles
+from data_typings.emoji import gold
 
 
 @labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])
@@ -79,7 +80,7 @@ def _change_balance(target_id: int, value: int, action: Literal['change', 'set']
         s.add(user)
         s.commit()
 
-    return f"Готово, изменил баланс на {value}\nНа счету игрока: {balance}"
+    return f"Готово, изменил баланс на {value}{gold}\nНа счету игрока: {balance}{gold}"
 
 
 @labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),

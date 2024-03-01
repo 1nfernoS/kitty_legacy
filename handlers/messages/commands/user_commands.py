@@ -11,6 +11,7 @@ from ORM import session, User
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
 
 from data_typings.enums import RoleAccess, Roles
+from data_typings.emoji import gold
 from utils.math import commission_price
 
 
@@ -32,9 +33,9 @@ async def balance(msg: MessageMin):
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
 
-    message = f"Ваш долг: {-user.balance}(Положить {commission_price(-int(user.balance))})" \
+    message = f"Ваш долг: {-user.balance}{gold}(Положить {commission_price(-int(user.balance))})" \
         if user.balance < 0 \
-        else f"Сейчас на счету: {user.balance}"
+        else f"Сейчас на счету: {user.balance}{gold}"
     return await msg.answer(message)
 
 
@@ -48,7 +49,7 @@ async def all_balance(msg: MessageMin):
         return await msg.answer('Нет данных')
     message = f"Баланс участников гильдии {GUILD_NAME}:"
     for user in users:
-        message += f"\n@id{user.user_id}: {user.balance}"
+        message += f"\n@id{user.user_id}: {user.balance}{gold}"
     try:
         await api.messages.send(msg.from_id, 0, message=message)
     except VKAPIError[902, 901]:
@@ -58,7 +59,7 @@ async def all_balance(msg: MessageMin):
 
 @labeler.message(AccessRule(RoleAccess.bot_access),
                  text=['заметки', 'rules', 'notes', 'правила'])
-async def change_balance(msg: MessageMin):
+async def notes(msg: MessageMin):
     kbd = Keyboard(inline=True)
     kbd.add(OpenLink(NOTE_RULES, 'Правила'), KeyboardButtonColor.SECONDARY)
     kbd.add(OpenLink(NOTE_ALL, 'Все заметки'), KeyboardButtonColor.SECONDARY)
@@ -89,7 +90,7 @@ async def transfer_money(msg: MessageMin, amount: int):
         if not user_to.user_role.balance_access:
             return await msg.answer(f'У игрока нет доступа к балансу(Роль{user_to.role_name}), нужна другая роль')
         if user_from.balance < amount:
-            return await msg.answer(f'Недостаточно средств! (На счету {user_from.balance})')
+            return await msg.answer(f'Недостаточно средств! (На счету {user_from.balance}{gold})')
 
         user_from.balance -= amount
         user_to.balance += amount
@@ -97,4 +98,4 @@ async def transfer_money(msg: MessageMin, amount: int):
         s.add(user_to)
         s.commit()
 
-        return await msg.answer(f'Перевел {amount}!\n На счету осталось {user_from.balance}')
+        return await msg.answer(f'Перевел {amount}{gold}!\n На счету осталось {user_from.balance}{gold}')
