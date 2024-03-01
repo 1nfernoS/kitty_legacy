@@ -6,7 +6,7 @@ from vkbottle import Keyboard, KeyboardButtonColor, OpenLink
 from bot_engine import labeler
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
-from ORM import session, User
+from ORM import session, User, Role
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
 
@@ -59,3 +59,38 @@ async def change_balance(msg: MessageMin):
     kbd.add(OpenLink(NOTE_RULES, 'Правила'), KeyboardButtonColor.SECONDARY)
     kbd.add(OpenLink(NOTE_ALL, 'Все заметки'), KeyboardButtonColor.SECONDARY)
     return await msg.answer('Заметки:', keyboard=kbd.get_json())
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
+                 text=['перевести <amount:int>', 'transfer <amount:int>'])
+async def transfer_money(msg: MessageMin, amount: int):
+    try:
+        amount = int(amount)
+    except ValueError:
+        return await msg.answer('Я не могу перевести не число')
+
+    if amount <= 0:
+        return await msg.answer('Нельзя перевести 0 или меньше золота!')
+
+    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    if target_id == msg.from_id:
+        return await msg.answer('Перевод самому себе, не стоит')
+
+    with session() as s:
+        user_from: User = s.query(User).filter(User.user_id == msg.from_id).first()
+        user_to: User = s.query(User).filter(User.user_id == target_id).first()
+
+        if not user_to:
+            return await msg.answer('Нет записей об игроке, пусть напишет что-нибудь')
+        if not user_to.user_role.balance_access:
+            return await msg.answer(f'У игрока нет доступа к балансу(Роль{user_to.role_name}), нужна другая роль')
+        if user_from.balance < amount:
+            return await msg.answer(f'Недостаточно средств! (На счету {user_from.balance})')
+
+        user_from.balance -= amount
+        user_to.balance += amount
+        s.add(user_from)
+        s.add(user_to)
+        s.commit()
+
+        return await msg.answer(f'Перевел {amount}!\n На счету осталось {user_from.balance}')
