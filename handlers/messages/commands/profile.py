@@ -9,7 +9,7 @@ from utils.math import commission_price, discount_price
 from utils.formatters import format_profile_skills
 
 from bot_engine import labeler, api
-from bot_engine.rules import AccessRule
+from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
 import profile_api
 from profile_api.user_requests import get_profile, lvl_skills
@@ -66,31 +66,28 @@ async def item_price(msg: MessageMin, item: str):
     return await _item_price_base(msg, item)
 
 
-@labeler.message(AccessRule(RoleAccess.profile_app), text=['билд', 'build', 'экип', 'equip'])
-async def get_build(msg: MessageMin):
-    msg_to_edit = await msg.answer('Поднимаю записи...')
-
+async def _get_build(user_id: int) -> str:
     with session() as s:
-        auth: str | None = s.query(User.profile_key).filter(User.user_id == msg.from_id).first()[0]
+        auth: str | None = s.query(User.profile_key).filter(User.user_id == user_id).first()[0]
     if not auth:
         message = "Сдайте ссылку на профиль мне в лс!\n" \
                   "Проще всего это сделать через сайт, скопировав адрес ссылки кнопки 'Профиль' в приложении.\n" \
                   "Если получилась ссылка формата 'https:// vip3.activeusers .ru/блаблабла', то все получится)"
-        return await msg.answer(message)
+        return message
 
-    profile = await get_profile(auth, msg.from_id)
+    profile = await get_profile(auth, user_id)
     inv = [int(i) for i in profile['items']]
     books = get_books(inv)
     build = get_build(inv)
-    skills = await lvl_skills(auth, msg.from_id)
+    skills = await lvl_skills(auth, user_id)
 
     with session() as s:
-        user: User = s.query(User).filter(User.user_id == msg.from_id).first()
+        user: User = s.query(User).filter(User.user_id == user_id).first()
         user.user_items = [s.query(Item).filter(Item.id == i).first()
                            for i in books]
         s.add(user)
         s.commit()
-    user_name = await api.users.get(msg.from_id, name_case="gen")
+    user_name = await api.users.get(user_id, name_case="gen")
     user_name = f"[id{user_name[0].id}|{user_name[0].first_name}]"
     message = f'Билд {user_name}:'
     if build['books']:
@@ -100,6 +97,26 @@ async def get_build(msg: MessageMin):
     if build['adms']:
         message += '\nВ адмах:'
         message += format_profile_skills(build['adms'], skills)
+
+    return message
+
+@labeler.message(AccessRule(RoleAccess.profile_app), text=['билд', 'build', 'экип', 'equip'])
+async def get_build(msg: MessageMin):
+    msg_to_edit = await msg.answer('Поднимаю записи...')
+
+    message = await _get_build(msg.from_id)
+
+    return await api.messages.edit(msg_to_edit.peer_id, message,
+                                   conversation_message_id=msg_to_edit.conversation_message_id)
+
+
+@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator),
+                 text=['билд', 'build', 'экип', 'equip'])
+async def get_other_build(msg: MessageMin):
+    msg_to_edit = await msg.answer('Поднимаю записи...')
+
+    target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    message = await _get_build(target_id)
 
     return await api.messages.edit(msg_to_edit.peer_id, message,
                                    conversation_message_id=msg_to_edit.conversation_message_id)
