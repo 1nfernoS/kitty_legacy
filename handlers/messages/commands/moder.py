@@ -8,7 +8,7 @@ from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
 from ORM import session, Role, User
 
-from data_typings.enums import RoleAccess, Roles
+from data_typings.enums import RoleAccess, Roles, guild_roles
 from data_typings.emoji import gold
 
 
@@ -97,3 +97,15 @@ async def change_balance(msg: MessageMin, value: int):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     answer = _change_balance(target_id, value, 'change')
     return await msg.answer(answer)
+
+
+@labeler.message(AccessRule(RoleAccess.moderator),
+                 text=['налоговая', 'bill'])
+async def bill(msg: MessageMin):
+    with session() as s:
+        users: List[User] | None = s.query(User).filter(User.role_name.in_([i.name for i in guild_roles])).all()
+        for user in users:
+            user.balance -= user.stat_level * 140
+            s.add(user)
+        s.commit()
+    return await msg.answer(f"Списал налог с баланса, проверять можно командой баланс")

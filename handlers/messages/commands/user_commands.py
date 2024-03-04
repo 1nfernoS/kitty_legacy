@@ -10,7 +10,7 @@ from ORM import session, User
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
 
-from data_typings.enums import RoleAccess, Roles
+from data_typings.enums import RoleAccess, Roles, guild_roles
 from data_typings.emoji import gold
 from utils.formatters import format_name
 from utils.math import commission_price
@@ -43,7 +43,6 @@ async def balance(msg: MessageMin):
 @labeler.message(AccessRule(RoleAccess.change_balance),
                  text=['баланс все', 'счет все', 'счёт все', 'balance all', 'wallet all'])
 async def all_balance(msg: MessageMin):
-    guild_roles = (Roles.creator, Roles.leader, Roles.captain, Roles.officer, Roles.guild, Roles.newbie)
     with session() as s:
         users: List[User] | None = s.query(User).filter(User.role_name.in_([i.name for i in guild_roles])).all()
     if not users:

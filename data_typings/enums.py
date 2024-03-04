@@ -50,3 +50,6 @@ class Roles(IntEnum):
     guest = 6
     other = 7
     blacklist = 8
+
+
+guild_roles = (Roles.creator, Roles.leader, Roles.captain, Roles.officer, Roles.guild, Roles.newbie)
