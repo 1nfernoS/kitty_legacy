@@ -1,5 +1,7 @@
 from collections.abc import Sequence
 
+import re
+
 from vkbottle.dispatch.rules import ABCRule
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 
@@ -69,31 +71,21 @@ class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
 
 class FwdPitRule(ABCRule[BaseMessageMin]):
     """
-    Rule to check if message is Forwarded from pit
+    Rule to check if message is Forwarded from pit and contains text
     """
     
-    def __init__(self, only_first: bool = True):
+    def __init__(self, text: str, only_first: bool = True):
+        if isinstance(text, str):
+            text = [re.compile(text)]
+        self.text = text
+        
         self.only_first = only_first
         return
     
     async def check(self, event: BaseMessageMin) -> bool:
-        if event.fwd_messages:
-            return (event.fwd_messages[0].from_id == PIT_BOT and
-                    len(event.fwd_messages) == 1) if self.only_first else True
-        return False
+        if not event.fwd_messages or event.fwd_messages[0].from_id != PIT_BOT:
+            return False
+        if self.only_first and len(event.fwd_messages) != 1:
+            return False
 
-
-class FwdPitRule(ABCRule[BaseMessageMin]):
-    """
-    Rule to check if message is Forwarded from pit
-    """
-    
-    def __init__(self, only_first: bool = True):
-        self.only_first = only_first
-        return
-    
-    async def check(self, event: BaseMessageMin) -> bool:
-        if event.fwd_messages:
-            return (event.fwd_messages[0].from_id == PIT_BOT and
-                    len(event.fwd_messages) == 1) if self.only_first else True
-        return False
+        return True

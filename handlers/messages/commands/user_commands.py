@@ -16,8 +16,8 @@ from utils.formatters import format_name
 from utils.math import commission_price
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
-                 text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
+@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
+                      text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
 async def other_balance(msg: MessageMin):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     with session() as s:
@@ -29,7 +29,7 @@ async def other_balance(msg: MessageMin):
     return await msg.answer(message)
 
 
-@labeler.message(AccessRule(RoleAccess.balance_access), text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
+@labeler.chat_message(AccessRule(RoleAccess.balance_access), text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
 async def balance(msg: MessageMin):
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
@@ -40,8 +40,8 @@ async def balance(msg: MessageMin):
     return await msg.answer(message)
 
 
-@labeler.message(AccessRule(RoleAccess.change_balance),
-                 text=['баланс все', 'счет все', 'счёт все', 'balance all', 'wallet all'])
+@labeler.chat_message(AccessRule(RoleAccess.change_balance),
+                      text=['баланс все', 'счет все', 'счёт все', 'balance all', 'wallet all'])
 async def all_balance(msg: MessageMin):
     with session() as s:
         users: List[User] | None = s.query(User).filter(User.role_name.in_([i.name for i in guild_roles])).all()
@@ -57,8 +57,8 @@ async def all_balance(msg: MessageMin):
     return await msg.answer('Отправил список в лс')
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access),
-                 text=['заметки', 'rules', 'notes', 'правила'])
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      text=['заметки', 'rules', 'notes', 'правила'])
 async def notes(msg: MessageMin):
     kbd = Keyboard(inline=True)
     kbd.add(OpenLink(NOTE_RULES, 'Правила'), KeyboardButtonColor.SECONDARY)
@@ -66,8 +66,8 @@ async def notes(msg: MessageMin):
     return await msg.answer('Заметки:', keyboard=kbd.get_json())
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
-                 text=['перевести <amount:int>', 'transfer <amount:int>'])
+@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
+                      text=['перевести <amount:int>', 'transfer <amount:int>'])
 async def transfer_money(msg: MessageMin, amount: int):
     try:
         amount = int(amount)

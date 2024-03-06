@@ -11,7 +11,7 @@ from data_typings.enums import RoleAccess
 from utils.math import pure_price, commission_price
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['ping', 'пинг'])
+@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['ping', 'пинг'])
 async def ping(msg: MessageMin):
     from random import choice
     answers: List[str] = ["Я живой", "Да живой я", "Все в порядке", "понг", "Что-то случилось?", "Не стучи ><",
@@ -22,7 +22,7 @@ async def ping(msg: MessageMin):
     await msg.answer(choice(answers))
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
+@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
 async def other_role(msg: MessageMin):
     user_id = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     with session() as s:
@@ -31,7 +31,7 @@ async def other_role(msg: MessageMin):
     await msg.answer(f'Роль пользователя - {user_role.alias.capitalize()}')
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['role', 'роль'])
+@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['role', 'роль'])
 async def role(msg: MessageMin):
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
@@ -39,7 +39,7 @@ async def role(msg: MessageMin):
     await msg.answer(f'Ваша роль - {user_role.alias.capitalize()}')
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['грязными <money:int>', 'dirty <money:int>'])
+@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['грязными <money:int>', 'dirty <money:int>'])
 async def dirty(msg: MessageMin, money: int):
     try:
         await msg.answer(pure_price(int(money)))
@@ -47,7 +47,7 @@ async def dirty(msg: MessageMin, money: int):
         return
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['чистыми <money:int>', 'pure <money:int>'])
+@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['чистыми <money:int>', 'pure <money:int>'])
 async def pure(msg: MessageMin, money: int):
     try:
         await msg.answer(commission_price(int(money)))
@@ -55,10 +55,10 @@ async def pure(msg: MessageMin, money: int):
         return
 
 
-@labeler.message(AccessRule(RoleAccess.admin_utils),
-                 text=['обнови предметы <start:int> <end:int>',
-                       'update items <start:int> <end:int>',
-                       'обновить предметы <start:int> <end:int>'])
+@labeler.chat_message(AccessRule(RoleAccess.admin_utils),
+                      text=['обнови предметы <start:int> <end:int>',
+                            'update items <start:int> <end:int>',
+                            'обновить предметы <start:int> <end:int>'])
 async def update_items(msg: MessageMin, start: int, end: int):
     try:
         start = int(start)

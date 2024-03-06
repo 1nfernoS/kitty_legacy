@@ -51,8 +51,8 @@ async def _item_price_base(msg: MessageMin, item: str, count: int = 1) -> Messag
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access),
-                 text=['цена <item:str> - <count:int>', 'price <item:str> - <count:int>'])
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      text=['цена <item:str> - <count:int>', 'price <item:str> - <count:int>'])
 async def item_price_many(msg: MessageMin, item: str, count: int):
     try:
         count = int(count)
@@ -61,7 +61,7 @@ async def item_price_many(msg: MessageMin, item: str, count: int):
     return await _item_price_base(msg, item, count)
 
 
-@labeler.message(AccessRule(RoleAccess.bot_access), text=['цена <item>', 'price <item>'])
+@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['цена <item>', 'price <item>'])
 async def item_price(msg: MessageMin, item: str):
     return await _item_price_base(msg, item)
 
@@ -99,7 +99,8 @@ async def _get_build(user_id: int) -> str:
 
     return message
 
-@labeler.message(AccessRule(RoleAccess.profile_app), text=['билд', 'build', 'экип', 'equip'])
+
+@labeler.chat_message(AccessRule(RoleAccess.profile_app), text=['билд', 'build', 'экип', 'equip'])
 async def get_self_build(msg: MessageMin):
     msg_to_edit = await msg.answer('Поднимаю записи...')
 
@@ -109,7 +110,7 @@ async def get_self_build(msg: MessageMin):
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator),
+@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator),
                  text=['билд', 'build', 'экип', 'equip'])
 async def get_other_build(msg: MessageMin):
     msg_to_edit = await msg.answer('Поднимаю записи...')
