@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-import re
+import vbml
 
 from vkbottle.dispatch.rules import ABCRule
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
@@ -71,14 +71,14 @@ class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
 
 class FwdPitRule(ABCRule[BaseMessageMin]):
     """
-    Rule to check if message is Forwarded from pit and contains text
+    Rule to check if message is Forwarded from pit and contains certain text
     """
     
-    def __init__(self, text: str, only_first: bool = True):
-        if isinstance(text, str):
-            text = [re.compile(text)]
-        self.text = text
-        
+    def __init__(self, pattern: str | vbml.Pattern, only_first: bool = True):
+        if isinstance(pattern, str):
+            pattern = vbml.Pattern(pattern)
+        self.pattern = pattern
+        self.patcher = vbml.Patcher()
         self.only_first = only_first
         return
     
@@ -87,5 +87,8 @@ class FwdPitRule(ABCRule[BaseMessageMin]):
             return False
         if self.only_first and len(event.fwd_messages) != 1:
             return False
-
-        return True
+        fwd_text = event.fwd_messages[0].text.encode('cp1251', 'xmlcharrefreplace').decode('cp1251')
+        result = self.patcher.check(self.pattern, fwd_text)
+        if not result:
+            return False
+        return result
