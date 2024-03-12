@@ -1,3 +1,5 @@
+from typing import List
+
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 import profile_api
@@ -7,6 +9,8 @@ from bot_engine import labeler, api
 from bot_engine.rules import FwdPitRule
 from config import DISCOUNT_PERCENT
 from data_typings import emoji
+from data_typings.items import symbols_answers
+from utils.formatters import frequent_letter
 
 
 @labeler.message(FwdPitRule(f'{emoji.item}1*<item_name>\n{emoji.gold}Цена: <item_price:int> золота'))
@@ -31,5 +35,26 @@ async def dark_vendor(msg: MessageMin, item_name: str, item_price: int):
               f'\nЦена аукциона: {emoji.gold}{auc_price} (со скидкой гильдии {DISCOUNT_PERCENT}%: ' \
               f'{emoji.gold}{guild_price}' \
               f'({emoji.gold}{guild_commission_price})\n\n'
+    return await api.messages.edit(msg_to_edit.peer_id, msg,
+                                   conversation_message_id=msg_to_edit.conversation_message_id)
+
+
+@labeler.message(FwdPitRule(f'Символы:\n<regex>\nОтправьте букву или текст:'))
+async def symbol_guesser(msg: MessageMin, regex: str):
+    msg_to_edit = await msg.answer('Символы, сейчас...')
+    with session() as s:
+        item_list: List[Item] = s.query(Item).filter(
+            Item.name.op('regexp')(f"(Книга - |^){regex.replace(emoji.empty, '[[:alnum:]]')}$")).all()
+    res = []
+    for i in item_list:
+        if i.id in symbols_answers or '-' in i.name:
+            res.append(i.name.replace('Книга - ', ''))
+
+    msg = 'Это наверняка что-то из этого:\n'
+
+    if not regex.replace(emoji.empty, '').replace(' ', ''):
+        best_guess = frequent_letter(res)
+        msg = f'Попробуй букву {best_guess.upper()} ! ' + msg
+    msg += '\n'.join(res)
     return await api.messages.edit(msg_to_edit.peer_id, msg,
                                    conversation_message_id=msg_to_edit.conversation_message_id)
