@@ -43,6 +43,8 @@ adm_ingredients: List[int] = [14527, 14454, 14549, 14521, 14523]
 adm_items: List[int] = [14128, 14130, 14132, 14134, 14136, 14138, 14140, 14142, 14144, 14302, 14304, 14306, 14573,
                         14575, 14577, 14579, 14869, 14920, 15019, 15021, 15023, 15025]
 
+symbols_answers = ingredients_drops + potions_other + rings_drops + materials_raw + maps + [14182]  # other: faith stone
+
 equipped_books_active: List[int] = [13408, 13409, 13547, 13553, 13586, 13593, 13598, 13601, 13604, 13607, 13610, 13613,
                                     13616, 13621, 13625, 13627]
 equipped_books_passive: List[int] = [13638, 13641, 13643, 13645, 13647, 13649, 13651, 13653, 13655, 13657, 13659, 13661,
