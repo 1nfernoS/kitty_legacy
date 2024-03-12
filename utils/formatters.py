@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, List
 
 from data_typings.profile import Skills
 from data_typings.emoji import tab, active_book, passive_book
@@ -29,3 +29,13 @@ async def format_name(user_id: int, case: Literal["nom", "gen", "dat", "acc", "i
     from bot_engine import api
     user = await api.users.get(user_id, name_case=case)
     return f"[id{user[0].id}|{user[0].first_name}]"
+
+
+def frequent_letter(word_list: List[str]) -> str:
+    letters = []
+    if len(word_list) == 1:
+        letters += list(word_list[0])
+    else:
+        for word in word_list:
+            letters += list(set(word))
+    return max(letters, key=lambda x: letters.count(x))
