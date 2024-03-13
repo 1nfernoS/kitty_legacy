@@ -8,8 +8,8 @@ from ORM import Item, session
 from bot_engine import labeler, api
 from bot_engine.rules import FwdPitRule
 from config import DISCOUNT_PERCENT
-from data_typings import emoji
-from data_typings.items import symbols_answers
+from resources import emoji
+from resources.items import symbols_answers
 from utils.formatters import frequent_letter
 
 
@@ -58,3 +58,7 @@ async def symbol_guesser(msg: MessageMin, regex: str):
     msg += '\n'.join(res)
     return await api.messages.edit(msg_to_edit.peer_id, msg,
                                    conversation_message_id=msg_to_edit.conversation_message_id)
+
+@labeler.message(FwdPitRule(f'<text>\n\n&#8987;Путешествие продолжается...\n<notice>'))
+async def travel_check(msg: MessageMin, notice: str):
+    pass

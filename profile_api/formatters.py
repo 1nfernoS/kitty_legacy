@@ -1,8 +1,8 @@
 from typing import List
 
 from data_typings.profile import Build
-from data_typings.items import (equipped_books_passive, equipped_books_active, adm_to_equipped_books,
-                                equipped_to_ordinary_active, equipped_to_ordinary_passive, adm_to_ordinary_books)
+from resources.items import (equipped_books_passive, equipped_books_active, adm_to_equipped_books,
+                             equipped_to_ordinary_active, equipped_to_ordinary_passive, adm_to_ordinary_books)
 
 
 def get_build(item_list: List[int]) -> Build:

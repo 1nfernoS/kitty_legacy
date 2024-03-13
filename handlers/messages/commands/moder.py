@@ -9,7 +9,7 @@ from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 from ORM import session, Role, User
 
 from data_typings.enums import RoleAccess, Roles, guild_roles
-from data_typings.emoji import gold
+from resources.emoji import gold
 
 
 @labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])

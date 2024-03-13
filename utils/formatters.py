@@ -1,7 +1,7 @@
 from typing import Literal, List
 
 from data_typings.profile import Skills
-from data_typings.emoji import tab, active_book, passive_book
+from resources.emoji import tab, active_book, passive_book
 
 
 def format_profile_skills(item_list: list, skills: Skills) -> str:

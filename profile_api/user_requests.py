@@ -3,7 +3,7 @@ from typing import List
 from . import _get_soup
 
 from data_typings.profile import Skill, Skills, Stats, Profile
-from data_typings.items import buff_classes, races
+from resources.items import buff_classes, races
 
 
 async def lvl_skills(auth_key: str, user_id: int) -> Skills:

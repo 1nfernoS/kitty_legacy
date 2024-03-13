@@ -10,8 +10,8 @@ from ORM import session, User
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
 
-from data_typings.enums import RoleAccess, Roles, guild_roles
-from data_typings.emoji import gold
+from data_typings.enums import RoleAccess, guild_roles
+from resources.emoji import gold
 from utils.formatters import format_name
 from utils.math import commission_price
 

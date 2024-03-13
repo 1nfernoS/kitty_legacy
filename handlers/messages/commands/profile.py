@@ -5,7 +5,7 @@ from vkbottle_types.objects import MessagesSendUserIdsResponseItem
 
 from config import DISCOUNT_PERCENT
 from data_typings.enums import RoleAccess
-from data_typings.emoji import gold, tab
+from resources.emoji import gold
 from utils.math import commission_price, discount_price
 from utils.formatters import format_profile_skills, format_name
 
