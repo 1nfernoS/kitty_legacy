@@ -1,4 +1,4 @@
-from typing import TypedDict, Optional, List, Dict
+from typing import TypedDict, Optional, Dict, Literal
 
 
 class DbData(TypedDict):
@@ -10,14 +10,8 @@ class DbData(TypedDict):
     connector: str
     port: Optional[int]
 
-
-class PuzzleTravel(TypedDict):
-    safe: List[str]
-    warn: List[str]
-    danger: List[str]
-
 class Puzzles(TypedDict):
-    travel: PuzzleTravel
+    travel: Dict[str, Literal["safe", "warn", "danger"]]
     pages: Dict[str, str]
     door: Dict[str, str]
     cross: Dict[str, str]
