@@ -79,4 +79,23 @@ async def travel_check(msg: MessageMin, notice: str):
         )
     except VKAPIError[15]:  # message from admin
         pass
-    return await msg.answer(answer.get(res))
+    return await msg.reply(answer.get(res))
+
+@labeler.message(FwdPitRule(['Дверь с грохотом открывается<text>\n\n<text1>', 'Дверь с грохотом открывается<text>']))
+async def door_answer(msg: MessageMin, text: str):
+    res: str | None = None
+    for riddle in puzzles['door']:
+        if riddle in text:
+            res = puzzles['door'][riddle]
+    if not res:
+        return await msg.answer(f"Ой, а я не знаю ответ\nCообщите в полигон или [id{creator_id}|ему]")
+
+    msg_id = await api.messages.get_by_conversation_message_id(msg.peer_id, msg.conversation_message_id)
+    try:
+        await api.messages.delete(
+            message_ids=msg_id.items[0].id,
+            delete_for_all=True
+        )
+    except VKAPIError[15]:  # message from admin
+        pass
+    return await msg.reply(f'Открываем дверь, а там ответ: {res}')
