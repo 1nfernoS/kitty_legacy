@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from typing import Iterable
 
 import vbml
 
@@ -75,10 +76,17 @@ class FwdPitRule(ABCRule[BaseMessageMin]):
     Rule to check if message is Forwarded from pit and contains certain text
     """
     
-    def __init__(self, pattern: str | vbml.Pattern, only_first: bool = True):
+    def __init__(self, pattern: str | vbml.Pattern | Iterable[str] | Iterable[vbml.Pattern],
+                 only_first: bool = True):
         if isinstance(pattern, str):
-            pattern = vbml.Pattern(pattern)
-        self.pattern = pattern
+            pattern = [vbml.Pattern(pattern)]
+        elif isinstance(pattern, vbml.Pattern):
+            pattern = [pattern]
+        elif isinstance(pattern, Iterable):
+            pattern = [
+                p if isinstance(p, vbml.Pattern) else vbml.Pattern(p) for p in pattern
+            ]
+        self.patterns = pattern
         self.patcher = vbml.Patcher()
         self.only_first = only_first
         return
@@ -89,7 +97,8 @@ class FwdPitRule(ABCRule[BaseMessageMin]):
         if self.only_first and len(event.fwd_messages) != 1:
             return False
         fwd_text = event.fwd_messages[0].text.encode('cp1251', 'xmlcharrefreplace').decode('cp1251')
-        result = self.patcher.check(self.pattern, fwd_text)
-        if not result:
-            return False
-        return {k: translate(result[k]) for k in result}
+        for pattern in self.patterns:
+            result = self.patcher.check(pattern, fwd_text)
+            if result not in (None, False):
+                return {k: translate(result[k]) for k in result}
+        return False
