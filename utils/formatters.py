@@ -39,3 +39,10 @@ def frequent_letter(word_list: List[str]) -> str:
         for word in word_list:
             letters += list(set(word))
     return max(letters, key=lambda x: letters.count(x))
+
+def translate(text: str) -> str:
+    translate_dict = {'A': 'А', 'B': 'В', 'C': 'С', 'E': 'Е', 'H': 'Н', 'K': 'К', 'M': 'М', 'O': 'О', 'P': 'Р',
+                      'T': 'Т', 'X': 'Х', 'a': 'а', 'c': 'с', 'e': 'е', 'o': 'о', 'p': 'р', 'x': 'х', 'y': 'у'}
+    for letter in translate_dict:
+        text = text.replace(letter, translate_dict[letter])
+    return text
