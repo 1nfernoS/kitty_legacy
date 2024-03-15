@@ -99,3 +99,25 @@ async def door_answer(msg: MessageMin, text: str):
     except VKAPIError[15]:  # message from admin
         pass
     return await msg.reply(f'Открываем дверь, а там ответ: {res}')
+
+@labeler.message(FwdPitRule('Книгу целиком уже не спасти, но одна из страниц уцелела. Кусок текста на ней гласит: '
+                            '«...<page_text>...».'
+                            '\nОсталось определить, какая именно это была книга...'))
+async def door_answer(msg: MessageMin, page_text: str):
+    res: str | None = None
+    for page in puzzles['pages']:
+        if page in page_text:
+            res = puzzles['pages'][page]
+
+    if not res:
+        return await msg.answer(f"Ой, а я не знаю ответ\nCообщите в полигон или [id{creator_id}|ему]")
+
+    msg_id = await api.messages.get_by_conversation_message_id(msg.peer_id, msg.conversation_message_id)
+    try:
+        await api.messages.delete(
+            message_ids=msg_id.items[0].id,
+            delete_for_all=True
+        )
+    except VKAPIError[15]:  # message from admin
+        pass
+    return await msg.reply(f'Это страница из книги {res}')
