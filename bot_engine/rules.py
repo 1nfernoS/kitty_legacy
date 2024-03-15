@@ -8,6 +8,7 @@ from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 from data_typings.enums import RoleAccess
 
 from config import PIT_BOT
+from utils.formatters import translate
 
 
 class WhiteListChatRule(ABCRule[BaseMessageMin]):
@@ -82,7 +83,7 @@ class FwdPitRule(ABCRule[BaseMessageMin]):
         self.only_first = only_first
         return
     
-    async def check(self, event: BaseMessageMin) -> bool:
+    async def check(self, event: BaseMessageMin) -> dict | bool:
         if not event.fwd_messages or event.fwd_messages[0].from_id != PIT_BOT:
             return False
         if self.only_first and len(event.fwd_messages) != 1:
@@ -91,4 +92,4 @@ class FwdPitRule(ABCRule[BaseMessageMin]):
         result = self.patcher.check(self.pattern, fwd_text)
         if not result:
             return False
-        return result
+        return {k: translate(result[k]) for k in result}
