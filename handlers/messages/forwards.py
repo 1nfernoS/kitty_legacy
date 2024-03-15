@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Literal, Dict
 
+from vkbottle import VKAPIError
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 import profile_api
@@ -7,8 +8,8 @@ import utils
 from ORM import Item, session
 from bot_engine import labeler, api
 from bot_engine.rules import FwdPitRule
-from config import DISCOUNT_PERCENT
-from resources import emoji
+from config import DISCOUNT_PERCENT, creator_id
+from resources import emoji, puzzles
 from resources.items import symbols_answers
 from utils.formatters import frequent_letter
 
@@ -59,6 +60,23 @@ async def symbol_guesser(msg: MessageMin, regex: str):
     return await api.messages.edit(msg_to_edit.peer_id, msg,
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
-@labeler.message(FwdPitRule(f'<text>\n\n&#8987;Путешествие продолжается...\n<notice>'))
+
+@labeler.message(FwdPitRule(f'<text1>\n<text2>\n\n&#8987;Путешествие продолжается...\n<notice>'))
 async def travel_check(msg: MessageMin, notice: str):
-    pass
+    res: Literal["safe", "warn", "danger"] | None = puzzles['travel'].get(notice)
+    if not res:
+        return await msg.answer(f"(+?) Неизвестное событие, сообщите в полигон или [id{creator_id}|ему]")
+    answer: Dict[Literal["safe", "warn", "danger"], str] = {
+        'safe': f"(+1) Можно продолжать путешествие",
+        'warn': f"(+2) Можно продолжать путешествие",
+        'danger': f"(+3) Событие предшествует смертельному!"
+    }
+    msg_id = await api.messages.get_by_conversation_message_id(msg.peer_id, msg.conversation_message_id)
+    try:
+        await api.messages.delete(
+            message_ids=msg_id.items[0].id,
+            delete_for_all=True
+        )
+    except VKAPIError[15]:  # message from admin
+        pass
+    return await msg.answer(answer.get(res))
