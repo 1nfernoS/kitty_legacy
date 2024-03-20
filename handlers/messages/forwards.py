@@ -18,6 +18,7 @@ from resources import emoji, puzzles
 from resources.items import symbols_answers
 from utils.formatters import frequent_letter
 from utils.datetime import now
+from utils.parsers import cross_signs
 
 
 @labeler.message(FwdPitRule(f'{emoji.item}1*<item_name>\n{emoji.gold}Цена: <item_price:int> золота'))
@@ -111,7 +112,7 @@ async def door_answer(msg: MessageMin, text: str):
 @labeler.message(FwdPitRule('Книгу целиком уже не спасти, но одна из страниц уцелела. Кусок текста на ней гласит: '
                             '«...<page_text>...».'
                             '\nОсталось определить, какая именно это была книга...'))
-async def door_answer(msg: MessageMin, page_text: str):
+async def book_answer(msg: MessageMin, page_text: str):
     res: str | None = None
     for page in puzzles['pages']:
         if page in page_text:
@@ -133,7 +134,7 @@ async def door_answer(msg: MessageMin, page_text: str):
 
 @labeler.message(FwdPitRule('Вы успешно обменяли элитные трофеи (<count:int>) на репутацию гильдии!'
                             '\n&#127941;Текущая репутация гильдии: <all_count:int>'))
-async def door_answer(msg: MessageMin, count: int):
+async def elite_answer(msg: MessageMin, count: int):
     date = datetime.utcfromtimestamp(msg.fwd_messages[0].date)
     today = now()
     first_day = today.replace(day=1)
@@ -164,4 +165,28 @@ async def door_answer(msg: MessageMin, count: int):
     answer += f"Осталось сдать {limit - elites_count} штук" \
         if limit > elites_count \
         else f"Сданы все необходимые трофеи"
+    return await msg.reply(answer)
+
+
+@labeler.message(FwdPitRule(
+    f'Перед каждым проходом другими искателями приключений нацарапаны различные надписи, которые, '
+    f'видимо, могут помочь определить, куда ведет конкретная дорога.\n'
+    '&#128681;Западный путь: "<west_1>" и "<west_2>"\n'
+    '&#128681;Северный путь: "<north_1>" и "<north_2>"\n'
+    '&#128681;Восточный путь: "<east_1>" и "<east_2>"\n\n'
+    'Осталось выбрать, какому направлению последовать...'))
+async def cross_answer(msg: MessageMin, west_1: str, west_2: str, north_1: str, north_2: str, east_1: str, east_2: str):
+    west, north, east = (cross_signs(*i) for i in ([west_1, west_2], [north_1, north_2], [east_1, east_2]))
+    answer = "Направления ведут к\n"
+    answer += f"{emoji.flag} Запад - Это {west}\n"
+    answer += f"{emoji.flag} Север - Это {north}\n"
+    answer += f"{emoji.flag} Восток - Это {east}\n"
+    msg_id = await api.messages.get_by_conversation_message_id(msg.peer_id, msg.conversation_message_id)
+    try:
+        await api.messages.delete(
+            message_ids=msg_id.items[0].id,
+            delete_for_all=True
+        )
+    except VKAPIError[15]:  # message from admin
+        pass
     return await msg.reply(answer)
