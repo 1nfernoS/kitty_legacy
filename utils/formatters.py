@@ -41,6 +41,8 @@ def frequent_letter(word_list: List[str]) -> str:
     return max(letters, key=lambda x: letters.count(x))
 
 def translate(text: str) -> str:
+    if not isinstance(text, str):
+        return text
     translate_dict = {'A': 'А', 'B': 'В', 'C': 'С', 'E': 'Е', 'H': 'Н', 'K': 'К', 'M': 'М', 'O': 'О', 'P': 'Р',
                       'T': 'Т', 'X': 'Х', 'a': 'а', 'c': 'с', 'e': 'е', 'o': 'о', 'p': 'р', 'x': 'х', 'y': 'у'}
     for letter in translate_dict:
