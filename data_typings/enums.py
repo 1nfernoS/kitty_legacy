@@ -40,12 +40,10 @@ class ChangeMoneyAction(Enum):
     SET = auto()
 
 class SiegeRole(Enum):
-    def _generate_next_value_(name, start, count, last_values):
-        return name.lower()
 
-    MAGE = auto()
-    WARRIOR = auto()
-    ARCHER = auto()
+    MAGE = 'маг'
+    WARRIOR = 'боец'
+    ARCHER = 'лучник'
 
 
 class Roles(IntEnum):

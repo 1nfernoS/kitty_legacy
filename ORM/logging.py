@@ -31,14 +31,18 @@ class _LogsBase:
 class LogsSiege(_LogsBase, Base):
     __tablename__ = 'logs_siege'
 
-    guild: Mapped[str] = mapped_column(String(63), nullable=False, default=now())
+    guild: Mapped[str] = mapped_column(String(63), nullable=False)
+    role: Mapped[str] = mapped_column(String(7), nullable=False)
+    stat: Mapped[int] = mapped_column(default=0)
 
-    def __init__(self, user_id: int, guild: str):
+    def __init__(self, user_id: int, guild: str, role: str, stat: int):
         self.guild = guild
+        self.role = role
+        self.stat = stat
         super().__init__(user_id)
 
     def __str__(self):
-        return f"Siege report {self.user_id}: {self.guild}"
+        return f"Siege report {self.user_id}: {self.guild} ({self.role} +{self.stat})"
 
     def __repr__(self):
         return f"<LogsSiege {self.timestamp} ({self.user_id})>"
