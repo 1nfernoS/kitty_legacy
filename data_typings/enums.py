@@ -27,7 +27,6 @@ class ItemAction(Enum):
     PUT = auto()
     TAKE = auto()
 
-    GET = auto()
     GIVE = auto()
 
 
