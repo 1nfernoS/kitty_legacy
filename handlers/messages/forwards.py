@@ -1,17 +1,23 @@
 from typing import List, Literal, Dict
 
+from datetime import datetime, timedelta
+
+from sqlalchemy import func
+
 from vkbottle import VKAPIError
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 import profile_api
 import utils
-from ORM import Item, session
+from ORM import Item, session, User, LogsElites
 from bot_engine import labeler, api
 from bot_engine.rules import FwdPitRule
 from config import DISCOUNT_PERCENT, creator_id
+from data_typings.enums import guild_roles
 from resources import emoji, puzzles
 from resources.items import symbols_answers
 from utils.formatters import frequent_letter
+from utils.datetime import now
 
 
 @labeler.message(FwdPitRule(f'{emoji.item}1*<item_name>\n{emoji.gold}Цена: <item_price:int> золота'))
@@ -81,6 +87,7 @@ async def travel_check(msg: MessageMin, notice: str):
         pass
     return await msg.reply(answer.get(res))
 
+
 @labeler.message(FwdPitRule(['Дверь с грохотом открывается<text>\n\n<text1>', 'Дверь с грохотом открывается<text>']))
 async def door_answer(msg: MessageMin, text: str):
     res: str | None = None
@@ -99,6 +106,7 @@ async def door_answer(msg: MessageMin, text: str):
     except VKAPIError[15]:  # message from admin
         pass
     return await msg.reply(f'Открываем дверь, а там ответ: {res}')
+
 
 @labeler.message(FwdPitRule('Книгу целиком уже не спасти, но одна из страниц уцелела. Кусок текста на ней гласит: '
                             '«...<page_text>...».'
@@ -121,3 +129,39 @@ async def door_answer(msg: MessageMin, page_text: str):
     except VKAPIError[15]:  # message from admin
         pass
     return await msg.reply(f'Это страница из книги {res}')
+
+
+@labeler.message(FwdPitRule('Вы успешно обменяли элитные трофеи (<count:int>) на репутацию гильдии!'
+                            '\n&#127941;Текущая репутация гильдии: <all_count:int>'))
+async def door_answer(msg: MessageMin, count: int):
+    date = datetime.utcfromtimestamp(msg.fwd_messages[0].date)
+    today = now()
+    first_day = today.replace(day=1)
+    last_day = today.replace(month=today.month % 12 + 1, year=today.year + (today.month // 12)) - timedelta(days=1)
+    with (session() as s):
+        user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
+        role = user.user_role
+    if role.name not in [i.name for i in guild_roles]:
+        return
+
+    if date.date() != now().date():
+        return await msg.answer('Мне нужны элитные трофеи сданные лишь сегодня')
+
+    if user.stat_level < 100:
+        limit = 40
+    elif user.stat_level < 250:
+        limit = 90
+    else:
+        limit = 120
+
+    LogsElites(msg.from_id, count).make_log()
+
+    with session() as s:
+        elites_count: int = s.query(func.sum(LogsElites.count)).filter(
+            LogsElites.timestamp.between(first_day, last_day),
+            LogsElites.user_id == msg.from_id).scalar()
+    answer = f"Добавил {count} к элитным трофеям! Сдано за месяц: {elites_count}\n"
+    answer += f"Осталось сдать {limit - elites_count} штук" \
+        if limit > elites_count \
+        else f"Сданы все необходимые трофеи"
+    return await msg.reply(answer)
