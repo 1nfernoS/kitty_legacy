@@ -8,7 +8,7 @@ from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 
 from data_typings.enums import RoleAccess
 
-from config import PIT_BOT
+from config import PIT_BOT, OVERSEER_BOT
 from utils.formatters import translate
 
 
@@ -50,6 +50,34 @@ class AccessRule(ABCRule[BaseMessageMin]):
                       "Если получилась ссылка формата 'https:// vip3.activeusers .ru/блаблабла', то все получится)"
             await event.answer(message)
         return result
+
+
+class OverseerRule(ABCRule[BaseMessageMin]):
+    """
+    Rule to check if message sent by overseer bot
+    """
+    def __init__(self, pattern: str | vbml.Pattern | Iterable[str] | Iterable[vbml.Pattern]):
+        if isinstance(pattern, str):
+            pattern = [vbml.Pattern(pattern)]
+        elif isinstance(pattern, vbml.Pattern):
+            pattern = [pattern]
+        elif isinstance(pattern, Iterable):
+            pattern = [
+                p if isinstance(p, vbml.Pattern) else vbml.Pattern(p) for p in pattern
+            ]
+        self.patterns = pattern
+        self.patcher = vbml.Patcher()
+        return
+
+    async def check(self, event: BaseMessageMin) -> dict | bool:
+        if event.from_id != OVERSEER_BOT:
+            return False
+        text = event.text.encode('cp1251', 'xmlcharrefreplace').decode('cp1251')
+        for pattern in self.patterns:
+            result = self.patcher.check(pattern, text)
+            if result not in (None, False):
+                return result
+        return False
 
 
 class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
