@@ -24,5 +24,18 @@ async def take_log(msg: MessageMin, user_id: int, count: int, item_name: str):
         item: Item | None = s.query(Item).filter(Item.name == item_name).first()
     if not item:
         return  # TODO: log error
-    LogsItems(user_id, ItemAction.TAKE, 0, item.id, count).make_log()
+    LogsItems(0, ItemAction.TAKE, user_idНу , item.id, count).make_log()
+    return
+
+
+@labeler.chat_message(OverseerRule([f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: &#<emo>;<count:int>*<item_name> "
+                                    f"от игрока [id<id_from:int>|<name_from>]!",
+                                    f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: &#<emo>;<item_name>"
+                                    f" от игрока [id<id_from:int>|<name_from>]!"]))
+async def transfer_log(msg: MessageMin, id_from: int, id_to: int, item_name: str, count: int = 1):
+    with session() as s:
+        item: Item | None = s.query(Item).filter(Item.name == item_name).first()
+    if not item:
+        return  # TODO: log error
+    LogsItems(id_from, ItemAction.GIVE, id_to, item.id, count).make_log()
     return
