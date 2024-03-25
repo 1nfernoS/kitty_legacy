@@ -10,7 +10,7 @@ from utils.formatters import balance_message_addition
 
 @labeler.chat_message(OverseerRule(f"&#<emo1>;[id<user_id:int>|<name>], Вы положили на склад: &#<emo2>;<count:int>*<item_name>!\n"
                                    f"&#128275;Места на складе: <space:int>"))
-async def put_log(msg: MessageMin, user_id: int, count: int, item_name: str):
+async def item_put(msg: MessageMin, user_id: int, count: int, item_name: str):
     with session() as s:
         item: Item | None = s.query(Item).filter(Item.name == item_name).first()
     if not item:
@@ -21,7 +21,7 @@ async def put_log(msg: MessageMin, user_id: int, count: int, item_name: str):
 
 @labeler.chat_message(OverseerRule(f"&#<emo1>;[id<user_id:int>|<name>], Вы взяли со склада: &#<emo2>;<count:int>*<item_name>!\n"
                                    f"&#128275;Места на складе: <space:int>"))
-async def take_log(msg: MessageMin, user_id: int, count: int, item_name: str):
+async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
     with session() as s:
         item: Item | None = s.query(Item).filter(Item.name == item_name).first()
     if not item:
@@ -34,7 +34,7 @@ async def take_log(msg: MessageMin, user_id: int, count: int, item_name: str):
                                     f"от игрока [id<id_from:int>|<name_from>]!",
                                     f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: &#<emo>;<item_name>"
                                     f" от игрока [id<id_from:int>|<name_from>]!"]))
-async def transfer_log(msg: MessageMin, id_from: int, id_to: int, item_name: str, count: int = 1):
+async def item_transfer(msg: MessageMin, id_from: int, id_to: int, item_name: str, count: int = 1):
     with session() as s:
         item: Item | None = s.query(Item).filter(Item.name == item_name).first()
     if not item:
