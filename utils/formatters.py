@@ -1,7 +1,8 @@
 from typing import Literal, List
 
 from data_typings.profile import Skills
-from resources.emoji import tab, active_book, passive_book
+from resources.emoji import tab, active_book, passive_book, gold
+from .math import commission_price
 
 
 def format_profile_skills(item_list: list, skills: Skills) -> str:
@@ -48,3 +49,8 @@ def translate(text: str) -> str:
     for letter in translate_dict:
         text = text.replace(letter, translate_dict[letter])
     return text
+
+
+def balance_message_addition(balance: int) -> str:
+    return f"Ваш долг: {gold}{-int(balance)}(Положить {commission_price(-int(balance))} золота)" \
+        if balance < 0 else f"Сейчас на счету: {gold}{balance}"
