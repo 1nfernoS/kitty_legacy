@@ -10,6 +10,7 @@ from ORM import session, Role, User
 
 from data_typings.enums import RoleAccess, Roles, guild_roles
 from resources.emoji import gold
+from utils.formatters import balance_message_addition
 
 
 @labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])
@@ -80,7 +81,7 @@ def _change_balance(target_id: int, value: int, action: Literal['change', 'set']
         s.add(user)
         s.commit()
 
-    return f"Готово, изменил баланс на {value}{gold}\nНа счету игрока: {balance}{gold}"
+    return f"Готово, изменил баланс на {value}{gold}\n" + balance_message_addition(balance)
 
 
 @labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
