@@ -38,6 +38,7 @@ class ChangeMoneyAction(Enum):
     SUB = auto()
     SET = auto()
 
+
 class SiegeRole(Enum):
 
     MAGE = 'маг'

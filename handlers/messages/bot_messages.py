@@ -24,7 +24,7 @@ async def take_log(msg: MessageMin, user_id: int, count: int, item_name: str):
         item: Item | None = s.query(Item).filter(Item.name == item_name).first()
     if not item:
         return  # TODO: log error
-    LogsItems(0, ItemAction.TAKE, user_idНу , item.id, count).make_log()
+    LogsItems(0, ItemAction.TAKE, user_id , item.id, count).make_log()
     return
 
 
