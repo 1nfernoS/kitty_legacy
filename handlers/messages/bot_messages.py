@@ -4,7 +4,7 @@ from ORM import session, LogsItems, Item, LogsMoney, User
 from bot_engine import labeler
 from bot_engine.rules import OverseerRule
 from data_typings.enums import ItemAction, ChangeMoneyAction
-from resources.emoji import gold
+from resources import emoji
 from utils.formatters import balance_message_addition
 
 
@@ -45,7 +45,7 @@ async def item_transfer(msg: MessageMin, id_from: int, id_to: int, item_name: st
     return
 
 
-@labeler.chat_message(OverseerRule(f"{gold}[id<user_id>|<name>], Вы взяли <count:int> золота из казны."))
+@labeler.chat_message(OverseerRule(f"{emoji.gold}[id<user_id>|<name>], Вы взяли <count:int> золота из казны."))
 async def money_take(msg: MessageMin, user_id: int, count: int):
     LogsMoney(user_id, ChangeMoneyAction.SUB, count, 0, 'FROM STORAGE').make_log()
     with session() as s:
@@ -58,7 +58,7 @@ async def money_take(msg: MessageMin, user_id: int, count: int):
 
 
 @labeler.chat_message(OverseerRule(
-    f"{gold}[id<user_id>|<name>], Вы положили <count:int> золота в казну (комиссия 10%)."))
+    f"{emoji.gold}[id<user_id>|<name>], Вы положили <count:int> золота в казну (комиссия 10%)."))
 async def money_put(msg: MessageMin, user_id: int, count: int):
     LogsMoney(user_id, ChangeMoneyAction.ADD, count, 0, 'TO STORAGE').make_log()
     with session() as s:
@@ -68,3 +68,28 @@ async def money_put(msg: MessageMin, user_id: int, count: int):
         s.commit()
         answer = f"О, [id{user_id}|Вы] положили {count} золота!\n" + balance_message_addition(user.balance)
     return await msg.answer(answer)
+
+
+@labeler.chat_message(OverseerRule(
+    f'[id<user_id:int>|<name>], Ваш профиль:\n'
+    f'&#128100;Класс: <class_name>, <races>\n'
+    f'&#128101;Гильдия: <guild_name>\n'
+    f'&#128519;<karma> карма\n'
+    f'{emoji.level}Уровень: <level:int>\n'
+    f'&#127881;Достижений: <achievements:int>\n'
+    f'{emoji.gold}<gold:int> {emoji.scatter}<scatter:int>\n'
+    f'{emoji.strength}<strength:int> {emoji.agility}<agility:int> {emoji.endurance}<endurance:int> '
+    f'{emoji.luck}<luck:int> {emoji.attack}<attack:int> {emoji.defence}<defence:int>'))
+async def profile_message(msg: MessageMin, user_id: int, name: str, class_name: str, races: str,
+                          guild_name: str, karma: int, level: int, achievements: int,
+                          gold: int, scatter: int,
+                          strength: int, agility: int, endurance: int,
+                          luck: int, attack: int, defence: int):
+    # TODO
+    with session() as s:
+        user: User | None = s.query(User).filter(User.user_id == user_id).first()
+
+        s.add(user)
+        s.commit()
+
+    return await msg.answer()
