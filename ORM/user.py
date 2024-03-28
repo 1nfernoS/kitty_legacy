@@ -71,11 +71,11 @@ class User(Base):
     stat_luck: Mapped[int] = mapped_column(default=0)
     stat_accuracy: Mapped[int] = mapped_column(default=0)
     stat_concentration: Mapped[int] = mapped_column(default=0)
-    update_profile: Mapped[datetime] = mapped_column(default=now())
+    update_profile: Mapped[datetime] = mapped_column(default=None, nullable=True)
     role_name: Mapped[str] = mapped_column(ForeignKey('role.name'), default='other')
     profile_key: Mapped[str] = mapped_column(String(32), nullable=True)
     balance: Mapped[int] = mapped_column(default=0)
-    update_balance: Mapped[datetime] = mapped_column(default=now())
+    update_balance: Mapped[datetime] = mapped_column(default=None, nullable=True)
     
     user_items: Mapped[List["Item"]] = relationship(secondary='equipment', back_populates='item_users')
     user_role: Mapped["Role"] = relationship(back_populates='role_users', viewonly=True, lazy='immediate')
