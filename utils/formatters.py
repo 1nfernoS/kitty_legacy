@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal, List
 
 from data_typings.profile import Skills
@@ -54,3 +55,36 @@ def translate(text: str) -> str:
 def balance_message_addition(balance: int) -> str:
     return f"Ваш долг: {gold}{-int(balance)}(Положить {commission_price(-int(balance))} золота)" \
         if balance < 0 else f"Сейчас на счету: {gold}{balance}"
+
+def date_diff(d1: datetime, d2: datetime) -> str:
+    diff = max(d1, d2) - min(d1, d2)
+    res = 'Прошло '
+    if diff.days:
+        res += str(diff.days)
+        if diff.days // 10 == 1 or diff.days % 10 > 4:
+            res += ' дней '
+        elif diff.days // 10 > 1 and diff.days % 10 == 0:
+            res += ' дней '
+        elif diff.days % 10 > 1:
+            res += ' дня '
+        elif diff.days % 10 == 1:
+            res += ' день '
+    h = diff.seconds // 3600
+    if h:
+        res += str(h)
+        if h // 10 == 1 or h % 10 > 4 or h % 10 == 0:
+            res += ' часов '
+        elif h % 10 > 1:
+            res += ' часа '
+        elif h % 10 == 1:
+            res += ' час '
+    # even if d1==d2, result will be not empty
+    m = diff.seconds % 3600 // 60
+    res += str(m)
+    if m // 10 == 1 or m % 10 > 4 or m % 10 == 0:
+        res += ' минут '
+    elif m % 10 > 1:
+        res += ' минуты '
+    elif m % 10 == 1:
+        res += ' минута '
+    return res.strip() + f" c {min(d1, d2).strftime('%d.%m.%y %H:%M')}"
