@@ -93,6 +93,11 @@ async def profile_message(msg: MessageMin, user_id: int, name: str, class_name: 
 
     class_name = class_name[:class_name.find(' (')] if ' (' in class_name else class_name
     in_guild = GUILD_NAME in guild_name
+    new_role = Roles.other
+    if emoji.officer in guild_name:
+        new_role = Roles.officer
+    elif in_guild:
+        new_role = Roles.guild
 
     with session() as s:
         class_item: Item | None = s.query(Item).filter(Item.name.ilike(class_name)).first()
@@ -121,11 +126,6 @@ async def profile_message(msg: MessageMin, user_id: int, name: str, class_name: 
         user.stat_endurance = endurance
         user.update_profile = now()
 
-        new_role = Roles.other
-        if emoji.officer in guild_name:
-            new_role = Roles.officer
-        elif in_guild:
-            new_role = Roles.guild
         if getattr(Roles, user.role_name) > new_role:
             user.role_name = new_role.name
 
