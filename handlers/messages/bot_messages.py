@@ -5,9 +5,10 @@ from ORM import session, LogsItems, Item, LogsMoney, User
 from bot_engine import labeler, api
 from bot_engine.rules import OverseerRule
 from config import GUILD_NAME
+import profile_api
 from data_typings.enums import ItemAction, ChangeMoneyAction, Roles
-from resources import emoji
-from utils.formatters import balance_message_addition, date_diff
+from resources import emoji, items
+from utils.formatters import balance_message_addition, date_diff, format_name
 from utils.datetime import now
 
 
@@ -16,11 +17,31 @@ from utils.datetime import now
                                    f"&#128275;Места на складе: <space:int>"))
 async def item_put(msg: MessageMin, user_id: int, count: int, item_name: str):
     with session() as s:
-        item: Item | None = s.query(Item).filter(Item.name == item_name).first()
+        item: Item | None = s.query(Item).filter(
+            Item.name.op('regexp')(f"(Книга - |Книга - [[:alnum:]]+ |^[[:alnum:]]+ |^){item_name}.*$"),
+            Item.has_price == 1).first()
     if not item:
         return  # TODO: log error
+    
     LogsItems(user_id, ItemAction.PUT, 0, item.id, count).make_log()
-    return
+    
+    if item.id not in items.ordinary_books_all:
+        return
+    
+    price = await profile_api.get_price(item.id)
+    if price <= 0:
+        return
+    
+    with session() as s:
+        user: User = s.query(User).filter(User.user_id == user_id).first()
+        user.balance += price*count
+        s.add(user)
+        s.commit()
+        
+        answer = f"{await format_name(user.user_id, 'nom')}, пополняю баланс на {price * count}{emoji.gold}"
+        answer += f"({count}*{price})\n" if count > 1 else "\n" + balance_message_addition(user.balance)
+    
+    return await msg.answer(answer)
 
 
 @labeler.chat_message(OverseerRule(f"&#<emo1>;[id<user_id:int>|<name>], Вы взяли со склада: "
@@ -28,11 +49,31 @@ async def item_put(msg: MessageMin, user_id: int, count: int, item_name: str):
                                    f"&#128275;Места на складе: <space:int>"))
 async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
     with session() as s:
-        item: Item | None = s.query(Item).filter(Item.name == item_name).first()
+        item: Item | None = s.query(Item).filter(
+            Item.name.op('regexp')(f"(Книга - |Книга - [[:alnum:]]+ |^[[:alnum:]]+ |^){item_name}.*$"),
+            Item.has_price == 1).first()
     if not item:
         return  # TODO: log error
+    
     LogsItems(0, ItemAction.TAKE, user_id, item.id, count).make_log()
-    return
+    
+    if item.id not in items.ordinary_books_all:
+        return
+    
+    price = await profile_api.get_price(item.id)
+    if price <= 0:
+        return
+    
+    with session() as s:
+        user: User = s.query(User).filter(User.user_id == user_id).first()
+        user.balance -= price*count
+        s.add(user)
+        s.commit()
+        
+        answer = f"{await format_name(user.user_id, 'nom')}, списываю с баланса {price * count}{emoji.gold}"
+        answer += f"({count}*{price})\n" if count > 1 else "\n" + balance_message_addition(user.balance)
+    
+    return await msg.answer(answer)
 
 
 @labeler.chat_message(OverseerRule([f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: "
@@ -56,7 +97,8 @@ async def money_take(msg: MessageMin, user_id: int, count: int):
         user.balance -= count
         s.add(user)
         s.commit()
-        answer = f"О, [id{user_id}|Вы] взяли {count} золота!\n" + balance_message_addition(user.balance)
+        answer = f"{await format_name(user_id), 'nom'}, Вы взяли {count} золота!\n" + \
+                 balance_message_addition(user.balance)
     return await msg.answer(answer)
 
 
@@ -69,7 +111,8 @@ async def money_put(msg: MessageMin, user_id: int, count: int):
         user.balance += count
         s.add(user)
         s.commit()
-        answer = f"О, [id{user_id}|Вы] положили {count} золота!\n" + balance_message_addition(user.balance)
+        answer = f"{await format_name(user_id), 'nom'}, Вы положили {count} золота!\n" + \
+                 balance_message_addition(user.balance)
     return await msg.answer(answer)
 
 
