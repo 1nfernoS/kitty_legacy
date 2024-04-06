@@ -5,7 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from ORM import Base, session
 
-from config import TZ
 from utils.datetime import now
 
 

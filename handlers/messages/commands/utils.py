@@ -65,4 +65,4 @@ async def update_items(msg: MessageMin, start: int, end: int):
         end = int(end)
     except ValueError:
         return
-    await msg.answer('Не прописан парсер колодца, работаем над этим...')
+    return await msg.answer('Не прописан парсер колодца, работаем над этим...')
