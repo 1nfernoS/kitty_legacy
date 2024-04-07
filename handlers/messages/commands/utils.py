@@ -66,3 +66,9 @@ async def update_items(msg: MessageMin, start: int, end: int):
     except ValueError:
         return
     return await msg.answer('Не прописан парсер колодца, работаем над этим...')
+
+@labeler.chat_message(AccessRule(RoleAccess.admin_utils), text=['test', 'тест'])
+async def test_func(msg: MessageMin):
+    from resources.keyboards import apostol
+    
+    return await msg.answer('Хоп', keyboard=apostol(158154503, msg.conversation_message_id, msg.chat_id, 14413))
