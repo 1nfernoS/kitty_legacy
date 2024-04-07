@@ -1,12 +1,20 @@
 from typing import List, Dict
 
+from data_typings import BuffClasses
+
 races: List[int] = [14413, 14414, 14415, 14416, 14417, 14418, 14419]
+
+buff_races_dict: Dict[int, str] = {14413: 'человека', 14414: 'орка', 14415: 'гнома', 14416: 'нежити', 14417: 'эльфа',
+                                   14418: 'демона', 14419: 'гоблина'}
 
 gold: int = 13322
 scatter: int = 14069
 valuables: List[int] = [gold, scatter]
 
 buff_classes: List[int] = [14088, 14093, 14256, 14257, 14264]
+
+buff_classes_dict: BuffClasses = {'apostol': 14264, 'warlock': 14093, 'paladin': 14088, 'crusader': 14256,
+                                  'light_inc': 14257}
 
 ingredients_drops: List[int] = [14436, 14453, 14452, 14438, 14440, 14441, 14628, 14627, 14442, 14460, 14462, 14470,
                                 14472, 14550]
@@ -97,4 +105,3 @@ classes_dict: Dict[str, int] = {
     'королевский убийца': 14260, 'клинок тьмы': 14261, 'отрекшийся': 14262, 'прокаженный': 14263, 'апостол': 14264,
     'верховный маг': 14265, 'жнец душ': 14266, 'повелитель мрака': 14267
 }
-
