@@ -6,7 +6,7 @@ import vbml
 from vkbottle.dispatch.rules import ABCRule
 from vkbottle.tools.dev.mini_types.bot import MessageEventMin, MessageMin
 
-from data_typings.enums import RoleAccess
+from data_typings.enums import EventPayloadAction, RoleAccess
 
 from config import PIT_BOT, OVERSEER_BOT
 from utils.formatters import translate
@@ -137,7 +137,7 @@ class ActionEventRule(ABCRule[MessageEventMin]):
     Rule to check event matches action
     """
     
-    def __init__(self, action_type: str):
+    def __init__(self, action_type: EventPayloadAction):
         self.action_type = action_type
         return
     
