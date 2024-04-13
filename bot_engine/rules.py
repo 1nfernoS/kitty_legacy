@@ -130,3 +130,20 @@ class FwdPitRule(ABCRule[MessageMin]):
             if result not in (None, False):
                 return {k: translate(result[k]) for k in result}
         return False
+
+
+class ActionEventRule(ABCRule[MessageEventMin]):
+    """
+    Rule to check event matches action
+    """
+    
+    def __init__(self, action_type: str):
+        self.action_type = action_type
+        return
+    
+    async def check(self, event: MessageEventMin) -> bool:
+        if not event.payload:
+            return False
+        if 'action' not in event.payload:
+            return False
+        return event.payload['action'] == self.action_type
