@@ -1,10 +1,7 @@
-from enum import Enum, auto, IntEnum
+from enum import auto, IntEnum, StrEnum
 
 
-class RoleAccess(Enum):
-    def _generate_next_value_(name, start, count, last_values):
-        return name.lower()
-    
+class RoleAccess(StrEnum):
     bot_access = auto()
     admin_utils = auto()
     moderator = auto()
@@ -20,27 +17,19 @@ class RoleAccess(Enum):
     stats_access = auto()
 
 
-class ItemAction(Enum):
-    def _generate_next_value_(name, start, count, last_values):
-        return name.lower()
-
+class ItemAction(StrEnum):
     PUT = auto()
     TAKE = auto()
-
     GIVE = auto()
 
 
-class ChangeMoneyAction(Enum):
-    def _generate_next_value_(name, start, count, last_values):
-        return name.lower()
-
+class ChangeMoneyAction(StrEnum):
     ADD = auto()
     SUB = auto()
     SET = auto()
 
 
-class SiegeRole(Enum):
-
+class SiegeRole(StrEnum):
     MAGE = 'маг'
     WARRIOR = 'боец'
     ARCHER = 'лучник'
@@ -48,14 +37,19 @@ class SiegeRole(Enum):
 
 class Roles(IntEnum):
     creator = 0
-    leader = 1
-    captain = 2
-    officer = 3
-    guild = 4
-    newbie = 5
-    guest = 6
-    other = 7
-    blacklist = 8
+    leader = auto()
+    captain = auto()
+    officer = auto()
+    guild = auto()
+    newbie = auto()
+    guest = auto()
+    other = auto()
+    blacklist = auto()
+    
+
+class EventPayloadAction(StrEnum):
+    BUFF = auto()
+    REMOVE = auto()
 
 
 guild_roles = (Roles.creator, Roles.leader, Roles.captain, Roles.officer, Roles.guild, Roles.newbie)
