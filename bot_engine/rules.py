@@ -4,7 +4,7 @@ from typing import Iterable
 import vbml
 
 from vkbottle.dispatch.rules import ABCRule
-from vkbottle.tools.dev.mini_types.base import BaseMessageMin
+from vkbottle.tools.dev.mini_types.bot import MessageEventMin, MessageMin
 
 from data_typings.enums import RoleAccess
 
@@ -12,7 +12,7 @@ from config import PIT_BOT, OVERSEER_BOT
 from utils.formatters import translate
 
 
-class WhiteListChatRule(ABCRule[BaseMessageMin]):
+class WhiteListChatRule(ABCRule[MessageMin]):
     """
     Rule to check from where comes message.
     True if user not in ignore_users and chat in allowed_chats
@@ -22,11 +22,11 @@ class WhiteListChatRule(ABCRule[BaseMessageMin]):
         self.allowed_chats = allowed_chats
         return
     
-    async def check(self, event: BaseMessageMin) -> bool:
+    async def check(self, event: MessageMin) -> bool:
         return event.peer_id - 2e9 in self.allowed_chats
 
 
-class AccessRule(ABCRule[BaseMessageMin]):
+class AccessRule(ABCRule[MessageMin]):
     """
     Rule to check access type for user's role
     return Role access
@@ -36,7 +36,7 @@ class AccessRule(ABCRule[BaseMessageMin]):
         self.require = require_access.value
         return
     
-    async def check(self, event: BaseMessageMin) -> bool:
+    async def check(self, event: MessageMin) -> bool:
         if event.from_id < 0:
             return False
         from ORM import session, User, Role
@@ -52,7 +52,7 @@ class AccessRule(ABCRule[BaseMessageMin]):
         return result
 
 
-class OverseerRule(ABCRule[BaseMessageMin]):
+class OverseerRule(ABCRule[MessageMin]):
     """
     Rule to check if message sent by overseer bot
     """
@@ -69,7 +69,7 @@ class OverseerRule(ABCRule[BaseMessageMin]):
         self.patcher = vbml.Patcher()
         return
 
-    async def check(self, event: BaseMessageMin) -> dict | bool:
+    async def check(self, event: MessageMin) -> dict | bool:
         if event.from_id != OVERSEER_BOT:
             return False
         text = event.text.encode('cp1251', 'xmlcharrefreplace').decode('cp1251')
@@ -80,7 +80,7 @@ class OverseerRule(ABCRule[BaseMessageMin]):
         return False
 
 
-class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
+class FwdOrReplyUserRule(ABCRule[MessageMin]):
     """
     Rule to check if message has Forward or Reply from user
     """
@@ -89,7 +89,7 @@ class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
         self.allow_self = allow_self
         return
     
-    async def check(self, event: BaseMessageMin) -> bool:
+    async def check(self, event: MessageMin) -> bool:
         if event.reply_message:
             check_self = event.reply_message.from_id == event.from_id if not self.allow_self else True
             return event.reply_message.from_id > 0 and check_self
@@ -99,7 +99,7 @@ class FwdOrReplyUserRule(ABCRule[BaseMessageMin]):
         return False
 
 
-class FwdPitRule(ABCRule[BaseMessageMin]):
+class FwdPitRule(ABCRule[MessageMin]):
     """
     Rule to check if message is Forwarded from pit and contains certain text
     """
@@ -119,7 +119,7 @@ class FwdPitRule(ABCRule[BaseMessageMin]):
         self.only_first = only_first
         return
     
-    async def check(self, event: BaseMessageMin) -> dict | bool:
+    async def check(self, event: MessageMin) -> dict | bool:
         if not event.fwd_messages or event.fwd_messages[0].from_id != PIT_BOT:
             return False
         if self.only_first and len(event.fwd_messages) != 1:
