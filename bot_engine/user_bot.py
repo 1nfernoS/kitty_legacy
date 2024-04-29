@@ -1,12 +1,8 @@
-from vkbottle import API
 from vkbottle.tools.dev.mini_types.user import MessageMin
-from vkbottle.user import User, UserLabeler
+from vkbottle.user import UserLabeler
 
-from ORM import session, BuffUser
-
-from bot_engine.rules import PitBuffRule, OverseerRule
+from bot_engine.rules import OverseerRule
 from .middlewares import CheckBuffMiddleware
-from data_typings import BuffPayload
 
 from resources import puzzles
 
