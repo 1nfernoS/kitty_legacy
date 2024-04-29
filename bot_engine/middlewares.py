@@ -17,3 +17,14 @@ class RegisterMiddleware(BaseMiddleware[BaseMessageMin]):
                 s.add(User(user_id=self.event.from_id))
                 s.commit()
         return
+
+
+class CheckBuffMiddleware(BaseMiddleware[BaseMessageMin]):
+    """
+    Middleware to check if user handlers were executed
+    """
+    async def post(self):
+        if self.handlers:
+            from loguru import logger
+            logger.info('Has buff answer')
+        return
