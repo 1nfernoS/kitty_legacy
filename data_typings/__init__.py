@@ -1,6 +1,7 @@
 from typing import List, TypedDict, Optional, Dict, Literal
 
 from data_typings.enums import EventPayloadAction
+from vbml import Pattern
 
 
 class DbData(TypedDict):
@@ -14,8 +15,9 @@ class DbData(TypedDict):
     
     
 class BuffAnswer(TypedDict):
-    success: str
-    possible: List[str]
+    critical: Pattern
+    success: Pattern
+    possible: List[Pattern]
 
 
 class Puzzles(TypedDict):
