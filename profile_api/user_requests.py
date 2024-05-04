@@ -35,6 +35,7 @@ async def _stats(auth_key: str, user_id: int) -> Stats:
                   'luck': stat[6], 'accuracy': stat[7], 'concentration': stat[8]}
     return res
 
+
 async def _inv(auth_key: str, user_id: int) -> List[int]:
     soup = await _get_soup(act='user', auth_key=auth_key, viewer_id=user_id)
 
@@ -53,8 +54,10 @@ async def get_buff_class(auth_key: str, user_id: int) -> int | None:
             return val
     return None
 
+
 async def get_player_races(auth_key: str, user_id: int) -> List[int]:
     return [val for val in await _inv(auth_key, user_id) if val in races]
+
 
 async def get_buffer_voices(auth_key: str, user_id: int, class_id: int = 14264) -> int:
     soup = await _get_soup(act='item', auth_key=auth_key, viewer_id=user_id, id=class_id)

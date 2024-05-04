@@ -7,6 +7,7 @@ class RegisterMiddleware(BaseMiddleware[BaseMessageMin]):
     Middleware to check is user in DB.
     Register if not
     """
+
     async def pre(self):
         if self.event.from_id < 0:
             return

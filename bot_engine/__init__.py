@@ -10,11 +10,9 @@ from .middlewares import RegisterMiddleware
 
 api = API(group_token)
 labeler = BotLabeler()
+labeler.vbml_ignore_case = True
 labeler.message_view.register_middleware(RegisterMiddleware)
 labeler.auto_rules = [WhiteListChatRule(ALLOWED_CHATS)]
 
-
-import handlers
-handlers.dummy()
 
 bot = Bot(token=group_token, labeler=labeler)
