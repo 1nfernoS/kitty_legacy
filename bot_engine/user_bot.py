@@ -79,8 +79,9 @@ async def buff_loop(buff_data: BuffPayload):
                                  forward_messages=[msg_to_fwd.items[0].id],
                                  message=cmd_text)
     import asyncio
-    for i in range(3 * 10):
-        await asyncio.sleep(0.1)
+    delay = 0.5
+    for i in range(int(5 * (1/delay))):
+        await asyncio.sleep(delay)
         async for event in user.polling.listen():
             for update in event.get("updates", []):
                 await user.loop.create_task(user.router.route(update, user.polling.api))
