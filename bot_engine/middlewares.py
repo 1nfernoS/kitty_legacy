@@ -1,5 +1,7 @@
-from vkbottle import BaseMiddleware
+from vkbottle import BaseMiddleware, CtxStorage
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
+
+from data_typings import CtxBufferData
 
 
 class RegisterMiddleware(BaseMiddleware[BaseMessageMin]):
@@ -24,8 +26,18 @@ class CheckBuffMiddleware(BaseMiddleware[BaseMessageMin]):
     """
     Middleware to check if user handlers were executed
     """
+
     async def post(self):
         if self.handlers:
-            from loguru import logger
-            logger.info('Has buff answer')
+            self_user = await self.event.ctx_api.users.get()
+            self_user = self_user[0]
+
+            ctx_data: CtxBufferData = CtxStorage().get(self_user.id)
+            ctx_event = ctx_data['event']
+
+            from bot_engine import api as bot_api
+            await bot_api.messages.edit(peer_id=ctx_event.peer_id, message=self.event.text,
+                                        conversation_message_id=ctx_event.conversation_message_id)
+
+            CtxStorage().delete(self_user.id)
         return
