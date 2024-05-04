@@ -43,6 +43,7 @@ class AccessRule(ABCRule[MessageMin]):
         with session() as s:
             user: User | None = s.query(User).filter(User.user_id == event.from_id).first()
             role: Role = user.user_role
+            # noinspection PyTypeChecker
             result = getattr(role, self.require)
         return result
 

@@ -18,6 +18,7 @@ async def change_role(msg: MessageMin, name: str):
     name = name.lower()
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     with session() as s:
+        # noinspection PyTypeChecker
         roles: List[Role] = s.query(Role).all()
         user_role: Role | None = s.query(Role).filter(Role.role_users.any(User.user_id == msg.from_id)).first()
         target_role: Role | None = s.query(Role).filter(Role.role_users.any(User.user_id == target_id)).first()
@@ -104,6 +105,7 @@ async def change_balance(msg: MessageMin, value: int):
                       text=['налоговая', 'bill'])
 async def bill(msg: MessageMin):
     with session() as s:
+        # noinspection PyTypeChecker
         users: List[User] | None = s.query(User).filter(User.role_name.in_([i.name for i in guild_roles])).all()
         for user in users:
             user.balance -= user.stat_level * 140

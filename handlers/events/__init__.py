@@ -16,7 +16,7 @@ async def remove(event: MessageEventMin):
 
 @labeler.raw_event(GroupEventType.MESSAGE_EVENT, MessageEventMin, ActionEventRule(EventPayloadAction.BUFF))
 async def buff(event: MessageEventMin):
-    res = await event.show_snackbar('Hatova!')
+    res = await event.show_snackbar('Накладываю баф...')
     if CtxStorage().contains(event.payload['data']['from_id']):
         return await api.messages.edit(event.peer_id, 'Баффер занят, повторите позднее',
                                        conversation_message_id=event.conversation_message_id)

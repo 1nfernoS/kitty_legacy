@@ -11,6 +11,7 @@ def format_profile_skills(item_list: list, skills: Skills) -> str:
     message = ''
     with session() as s:
         for book in item_list:
+            # noinspection PyTypeChecker
             b_item: Item = s.query(Item).filter(Item.id == book).first()
 
             lvl = None
@@ -42,6 +43,7 @@ def frequent_letter(word_list: List[str]) -> str:
             letters += list(set(word))
     return max(letters, key=lambda x: letters.count(x))
 
+
 def translate(text: str) -> str:
     if not isinstance(text, str):
         return text
@@ -55,6 +57,7 @@ def translate(text: str) -> str:
 def balance_message_addition(balance: int) -> str:
     return f"Ваш долг: {gold}{-int(balance)}(Положить {commission_price(-int(balance))} золота)" \
         if balance < 0 else f"Сейчас на счету: {gold}{balance}"
+
 
 def date_diff(d1: datetime, d2: datetime) -> str:
     diff = max(d1, d2) - min(d1, d2)

@@ -26,6 +26,7 @@ async def _item_price_base(msg: MessageMin, item: str, count: int = 1) -> Messag
     msg_to_edit = await msg.answer('Ищу ценники . . .')
 
     with session() as s:
+        # noinspection PyTypeChecker
         search: List[Item] = s.query(Item).filter(
             Item.name.op('regexp')(f"(Книга - |Книга - [[:alnum:]]+ |^[[:alnum:]]+ |^){item}.*$"),
             Item.has_price == 1).all()
@@ -82,6 +83,7 @@ async def _get_build(user_id: int) -> str:
     skills = await lvl_skills(auth, user_id)
 
     with session() as s:
+        # noinspection PyTypeChecker
         user: User = s.query(User).filter(User.user_id == user_id).first()
         user.user_items = [s.query(Item).filter(Item.id == i).first()
                            for i in books]
@@ -111,7 +113,7 @@ async def get_self_build(msg: MessageMin):
 
 
 @labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator),
-                 text=['билд', 'build', 'экип', 'equip'])
+                      text=['билд', 'build', 'экип', 'equip'])
 async def get_other_build(msg: MessageMin):
     msg_to_edit = await msg.answer('Поднимаю записи...')
 

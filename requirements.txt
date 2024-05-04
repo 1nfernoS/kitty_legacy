@@ -6,3 +6,6 @@ mariadb~=1.1.9
 SQLAlchemy~=2.0.0
 vkbottle~=4.3.12
 beautifulsoup4~=4.12.3
+
+vbml~=1.1
+aiohttp~=3.9.5

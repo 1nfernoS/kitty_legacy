@@ -51,6 +51,7 @@ async def dark_vendor(msg: MessageMin, item_name: str, item_price: int):
 async def symbol_guesser(msg: MessageMin, regex: str):
     msg_to_edit = await msg.answer('Символы, сейчас...')
     with session() as s:
+        # noinspection PyTypeChecker
         item_list: List[Item] = s.query(Item).filter(
             Item.name.op('regexp')(f"(Книга - |^){regex.replace(emoji.empty, '[[:alnum:]]')}$")).all()
     res = []
@@ -78,7 +79,7 @@ async def travel_check(msg: MessageMin, notice: str):
         'warn': f"(+2) Можно продолжать путешествие",
         'danger': f"(+3) Событие предшествует смертельному!"
     }
-    
+
     res = await msg.reply(answer.get(res))
 
     try:
@@ -94,7 +95,7 @@ async def door_answer(msg: MessageMin, text: str):
     for riddle in puzzles['door']:
         if riddle in text:
             res = puzzles['door'][riddle]
-    
+
     if not res:
         return await msg.answer(f"Ой, а я не знаю ответ\nCообщите в полигон или [id{creator_id}|ему]")
 
@@ -177,9 +178,9 @@ async def cross_answer(msg: MessageMin, west_1: str, west_2: str, north_1: str, 
     answer += f"{emoji.flag} Запад - Это {west}\n"
     answer += f"{emoji.flag} Север - Это {north}\n"
     answer += f"{emoji.flag} Восток - Это {east}\n"
-    
+
     res = await msg.reply(answer)
-    
+
     try:
         await api.messages.delete(cmids=[msg.conversation_message_id], delete_for_all=True, peer_id=msg.peer_id)
     except VKAPIError[15]:  # message from admin
@@ -191,25 +192,26 @@ async def cross_answer(msg: MessageMin, west_1: str, west_2: str, north_1: str, 
                             '&#128100;Ваша роль: <siege_role> (+<count:int>&#<emoji:int>;)'))
 async def siege_answer(msg: MessageMin, guild: str, siege_role: str, count: int):
     date = datetime.utcfromtimestamp(msg.fwd_messages[0].date)
-    
+
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
         role = user.user_role
     if role.name not in [i.name for i in guild_roles]:
         return
-    
+
     if date.date() != now().date():
         return await msg.answer('Я не принимаю отчеты по осаде за другие дни')
-    
+
     with session() as s:
+        # noinspection PyTypeChecker
         siege: List[LogsSiege] | None = s.query(LogsSiege).filter(
             LogsSiege.timestamp.between(now().replace(hour=0, minute=0, second=0),
                                         now().replace(hour=23, minute=59, second=59),
-            LogsSiege.user_id == msg.from_id)).all()
+                                        LogsSiege.user_id == msg.from_id)).all()
     if siege:
         return await msg.reply('Твое участие уже зарегистрировано!')
-    
+
     LogsSiege(msg.from_id, guild, SiegeRole(siege_role).name, count).make_log()
-    
+
     answer = f"Зарегистрировал твое участие в осаде за {guild} ({siege_role} +{count})"
     return await msg.reply(answer)

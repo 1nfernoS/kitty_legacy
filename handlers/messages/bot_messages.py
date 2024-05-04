@@ -33,6 +33,7 @@ async def item_put(msg: MessageMin, user_id: int, count: int, item_name: str):
         return
     
     with session() as s:
+        # noinspection PyTypeChecker
         user: User = s.query(User).filter(User.user_id == user_id).first()
         user.balance += price*count
         s.add(user)
@@ -63,8 +64,9 @@ async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
     price = await profile_api.get_price(item.id)
     if price <= 0:
         return
-    
+
     with session() as s:
+        # noinspection PyTypeChecker
         user: User = s.query(User).filter(User.user_id == user_id).first()
         user.balance -= price*count
         s.add(user)
@@ -76,6 +78,7 @@ async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
     return await msg.answer(answer)
 
 
+# noinspection PyUnusedLocal
 @labeler.chat_message(OverseerRule([f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: "
                                     f"&#<emo>;<count:int>*<item_name> от игрока [id<id_from:int>|<name_from>]!",
                                     f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: &#<emo>;<item_name>"

@@ -10,7 +10,6 @@ from resources.items import buff_classes_dict
 from resources import emoji
 
 
-
 class RegisterMiddleware(BaseMiddleware[BaseMessageMin]):
     """
     Middleware to check is user in DB.
@@ -50,6 +49,7 @@ class CheckBuffMiddleware(BaseMiddleware[BaseMessageMin]):
 
         from bot_engine import api as bot_api
 
+        # noinspection PyTypeChecker
         target = await self.event.ctx_api.messages.get_by_conversation_message_id(
             peer_id=int(2e9 + ctx_payload['chat_id']),
             conversation_message_ids=ctx_payload['msg_id'])

@@ -6,8 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ORM import Base, session
 
-from utils.datetime import now
-
 __all__ = ["Item", "Role", "User"]
 
 
@@ -94,6 +92,7 @@ class __Equipment(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey(Item.id), primary_key=True)
 
 
+# noinspection PyUnusedLocal
 @event.listens_for(Role.__table__, 'after_create')
 def default_roles(*a, **kw):
     with session() as s:
@@ -239,6 +238,7 @@ def default_roles(*a, **kw):
         s.commit()
 
 
+# noinspection PyUnusedLocal
 @event.listens_for(Item.__table__, "after_create")
 def default_items(*a, **kw):
     with open('ORM/data/items.json') as f:

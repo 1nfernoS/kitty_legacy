@@ -19,10 +19,12 @@ user_labeler.message_view.register_middleware(CheckBuffMiddleware)
 
 def _transfer_money(user_from: int, user_to: int, amount: int):
     with session() as s:
+        # noinspection PyTypeChecker
         buffer: User = s.query(User).filter(User.user_id == user_to).first()
         buffer.balance += amount
         s.add(buffer)
 
+        # noinspection PyTypeChecker
         target: User = s.query(User).filter(User.user_id == user_from).first()
         if target.user_role.balance_access:
             target.balance -= amount
@@ -48,6 +50,7 @@ async def ordinary_buff(msg: MessageMin, user_id: int):
     return
 
 
+# noinspection PyUnusedLocal
 @user_labeler.private_message(OverseerRule(puzzles['buffs']['possible']))
 async def failed_buff(msg: MessageMin, user_id: int, voices: int = 0):
     from loguru import logger
@@ -71,6 +74,7 @@ async def buff_loop(buff_data: BuffPayload):
     user = User(token=buffer.buff_user_token, labeler=user_labeler)
     user_api = API(buffer.buff_user_token)
 
+    # noinspection PyTypeChecker
     msg_to_fwd = await user_api.messages.get_by_conversation_message_id(peer_id=int(2e9 + buff_data['chat_id']),
                                                                         conversation_message_ids=buff_data['msg_id'])
 

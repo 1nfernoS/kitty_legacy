@@ -3,6 +3,7 @@ from vkbottle.bot import Bot, BotLabeler
 
 from config import group_token, ALLOWED_CHATS
 
+# noinspection PyUnresolvedReferences
 import ORM
 
 from .rules import WhiteListChatRule

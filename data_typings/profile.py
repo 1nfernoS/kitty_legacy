@@ -22,6 +22,7 @@ class Stats(TypedDict):
     accuracy: int
     concentration: int
 
+
 class Profile(TypedDict):
     stats: Stats
     items: List[int]

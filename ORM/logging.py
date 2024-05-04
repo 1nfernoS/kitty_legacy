@@ -12,6 +12,7 @@ from utils.datetime import now
 __all__ = ("LogsSiege", "LogsElites", "LogsItems", "LogsMoney", "LogsCommand")
 
 
+# noinspection PyTypeChecker
 class _LogsBase:
     log_id: Mapped[int] = mapped_column(primary_key=True)
     timestamp: Mapped[datetime] = mapped_column(default=now())
@@ -28,6 +29,7 @@ class _LogsBase:
             s.commit()
 
 
+# noinspection PyTypeChecker
 class LogsSiege(_LogsBase, Base):
     __tablename__ = 'logs_siege'
 
@@ -48,6 +50,7 @@ class LogsSiege(_LogsBase, Base):
         return f"<LogsSiege {self.timestamp} ({self.user_id})>"
 
 
+# noinspection PyTypeChecker
 class LogsElites(_LogsBase, Base):
     __tablename__ = 'logs_elites'
 
@@ -64,6 +67,7 @@ class LogsElites(_LogsBase, Base):
         return f"<LogsElites {self.timestamp} ({self.user_id}: {self.count})>"
 
 
+# noinspection PyTypeChecker
 class LogsItems(_LogsBase, Base):
     __tablename__ = 'logs_items'
 
@@ -87,6 +91,7 @@ class LogsItems(_LogsBase, Base):
         return f"<LogsItems [{self.timestamp}] {self.action} {self.user_to} - {self.item_id} ({self.count})>"
 
 
+# noinspection PyTypeChecker
 class LogsMoney(_LogsBase, Base):
     __tablename__ = 'logs_money'
 
@@ -110,6 +115,7 @@ class LogsMoney(_LogsBase, Base):
         return f"<LogsMoney [{self.timestamp}] {self.user_id} ({self.action} {self.count})>"
 
 
+# noinspection PyTypeChecker
 class LogsCommand(_LogsBase, Base):
     __tablename__ = 'logs_command'
 
@@ -144,6 +150,7 @@ class __LogsMoneyAction(Base):
     action_type: Mapped[str] = mapped_column(String(63), primary_key=True)
 
 
+# noinspection PyUnusedLocal,PyUnresolvedReferences
 @event.listens_for(__LogsMoneyAction.__table__, 'after_create')
 def default_money_action(*a, **kw):
     with session() as s:
@@ -152,6 +159,7 @@ def default_money_action(*a, **kw):
         s.commit()
 
 
+# noinspection PyUnusedLocal,PyUnresolvedReferences
 @event.listens_for(__LogsItemsAction.__table__, 'after_create')
 def default_item_action(*a, **kw):
     with session() as s:

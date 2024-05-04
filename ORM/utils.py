@@ -39,6 +39,7 @@ class Task(Base):
         return f"<Task({int(self.task_regular)}) {self.task_exec_target}<{self.task_time_at}>: [{self.task_args}]>"
 
 
+# noinspection PyTypeChecker
 class Notes(Base):
     __tablename__ = 'notes'
 
@@ -48,8 +49,8 @@ class Notes(Base):
     expires_in: Mapped[datetime]
     is_active: Mapped[bool]
 
-    def __init__(self, author: int, text: str, expires: datetime = now() + timedelta(hours=168),
-                 active: bool = True):
+    def __init__(self, author: int, text: str, expires: datetime = now() + timedelta(hours=168), active: bool = True):
+        super().__init__()
         self.note_author = author
         self.note_text = text
         self.expires_in = expires

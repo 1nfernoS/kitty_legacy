@@ -1,7 +1,7 @@
 from resources import puzzles
 
-def cross_signs(arg1: str, arg2: str) -> str:
 
+def cross_signs(arg1: str, arg2: str) -> str:
     data1 = puzzles['cross'].get(arg1.lower(), 'Неизвестно').split(',')
     data2 = puzzles['cross'].get(arg2.lower(), 'Неизвестно').split(',')
     res = []

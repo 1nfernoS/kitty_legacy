@@ -40,6 +40,7 @@ class BuffCmd(Base):
         return f"<BuffCmd {self.buff_cmd_id}: {self.buff_cmd_text}>"
 
 
+# noinspection PyTypeChecker
 class BuffUser(Base):
     __tablename__ = 'buff_user'
     
@@ -81,6 +82,7 @@ class BuffTypeCmd(Base):
     buff_cmd_id: Mapped[int] = mapped_column(ForeignKey(BuffCmd.buff_cmd_id), primary_key=True)
 
 
+# noinspection PyUnusedLocal
 @event.listens_for(BuffCmd.__table__, 'after_create')
 def default_commands(*a, **kw):
     with session() as s:
@@ -99,6 +101,7 @@ def default_commands(*a, **kw):
         s.commit()
 
 
+# noinspection PyUnusedLocal
 @event.listens_for(BufferType.__table__, "after_create")
 def default_buffer_types(*a, **kw):
     with session() as s:
@@ -110,6 +113,7 @@ def default_buffer_types(*a, **kw):
         s.commit()
 
 
+# noinspection PyUnusedLocal
 @event.listens_for(BuffTypeCmd.__table__, "after_create")
 def default_buffer_type_cmd(*a, **kw):
     with session() as s:

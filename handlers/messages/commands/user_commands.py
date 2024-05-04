@@ -44,6 +44,7 @@ async def balance(msg: MessageMin):
                       text=['баланс все', 'счет все', 'счёт все', 'balance all', 'wallet all'])
 async def all_balance(msg: MessageMin):
     with session() as s:
+        # noinspection PyTypeChecker
         users: List[User] | None = s.query(User).filter(User.role_name.in_([i.name for i in guild_roles])).all()
     if not users:
         return await msg.answer('Нет данных')
@@ -82,7 +83,9 @@ async def transfer_money(msg: MessageMin, amount: int):
         return await msg.answer('Перевод самому себе, не стоит')
 
     with session() as s:
+        # noinspection PyTypeChecker
         user_from: User = s.query(User).filter(User.user_id == msg.from_id).first()
+        # noinspection PyTypeChecker
         user_to: User = s.query(User).filter(User.user_id == target_id).first()
 
         if not user_to:
