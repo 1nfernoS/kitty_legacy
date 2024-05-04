@@ -1,11 +1,9 @@
 from vkbottle.tools.dev.mini_types.user import MessageMin
 from vkbottle.user import UserLabeler
 
-from vkbottle import User, API
+from ORM import session, BuffCmd, BuffUser, User
 
-from ORM import session, BuffCmd, BuffUser
-
-from config import OVERSEER_BOT
+from config import OVERSEER_BOT, APO_PAYMENT
 from data_typings import BuffPayload
 
 from bot_engine.rules import OverseerRule
@@ -14,30 +12,45 @@ from .middlewares import CheckBuffMiddleware
 
 from resources import puzzles
 
-from loguru import logger
 
 user_labeler = UserLabeler()
 user_labeler.message_view.register_middleware(CheckBuffMiddleware)
 
 
-# TODO:
-#  Change balance
+def _transfer_money(user_from: int, user_to: int, amount: int):
+    with session() as s:
+        buffer: User = s.query(User).filter(User.user_id == user_to).first()
+        buffer.balance += amount
+        s.add(buffer)
+
+        target: User = s.query(User).filter(User.user_id == user_from).first()
+        if target.user_role.balance_access:
+            target.balance -= amount
+            s.add(target)
+        s.commit()
+    return
 
 
 @user_labeler.private_message(OverseerRule(puzzles['buffs']['critical']))
 async def critical_buff(msg: MessageMin, user_id: int):
-    logger.info(f'Critical buff on @id{user_id}')
+    self_user = await msg.ctx_api.users.get()
+    self_user = self_user[0]
+    payment = round(APO_PAYMENT*1.5) if round(APO_PAYMENT*1.5) == APO_PAYMENT*1.5 else int(APO_PAYMENT*1.5) + 1
+    _transfer_money(user_id, self_user.id, payment)
     return
 
 
 @user_labeler.private_message(OverseerRule(puzzles['buffs']['success']))
 async def ordinary_buff(msg: MessageMin, user_id: int):
-    logger.info(f'Ordinary buff on @id{user_id}')
+    self_user = await msg.ctx_api.users.get()
+    self_user = self_user[0]
+    _transfer_money(user_id, self_user.id, APO_PAYMENT)
     return
 
 
 @user_labeler.private_message(OverseerRule(puzzles['buffs']['possible']))
 async def failed_buff(msg: MessageMin, user_id: int, voices: int = 0):
+    from loguru import logger
     if voices:
         logger.info(f'Defended from target @id{user_id}')
     logger.info(f'Failed buff from buffer @id{user_id}')
@@ -45,6 +58,7 @@ async def failed_buff(msg: MessageMin, user_id: int, voices: int = 0):
 
 
 async def buff_loop(buff_data: BuffPayload):
+    from vkbottle import User, API
     with session() as s:
         buffer: BuffUser | None = s.query(BuffUser).filter(
             BuffUser.buff_user_id == buff_data['from_id']).first()
