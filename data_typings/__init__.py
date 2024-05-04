@@ -3,6 +3,9 @@ from typing import List, TypedDict, Optional, Dict, Literal
 from data_typings.enums import EventPayloadAction
 from vbml import Pattern
 
+from vkbottle import API
+from vkbottle.tools.dev.mini_types.bot import MessageEventMin
+
 
 class DbData(TypedDict):
     user: str
@@ -46,3 +49,8 @@ class BuffPayload(TypedDict):
 class EventPayload(TypedDict):
     action: EventPayloadAction
     data: Optional[BuffPayload]
+
+
+class CtxBufferData(TypedDict):
+    payload: BuffPayload
+    event: MessageEventMin
