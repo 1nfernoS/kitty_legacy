@@ -1,3 +1,5 @@
+from datetime import timedelta
+from json import dumps
 from typing import List
 
 from vkbottle.tools.dev.mini_types.bot import MessageMin
@@ -6,12 +8,15 @@ from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError
 from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
-from ORM import session, User
+from ORM import session, User, Task
+from bot_engine.tasks import remind
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
+from data_typings import RemindArgs
 
 from data_typings.enums import RoleAccess, guild_roles
 from resources.emoji import gold
+from utils import now
 from utils.formatters import format_name
 from utils.math import commission_price
 
@@ -102,3 +107,13 @@ async def transfer_money(msg: MessageMin, amount: int):
         s.commit()
 
         return await msg.answer(f'Перевел {amount}{gold}!\n На счету осталось {user_from.balance}{gold}')
+
+
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      text=['напомни <text>', 'напомни', 'remind <text>', 'remind'])
+async def set_remind(msg: MessageMin, text: str | None = None):
+    time_at = now() + timedelta(hours=1)
+    args: RemindArgs = {'user_id': msg.from_id, 'peer_id': msg.peer_id, 'text': text or '', 'msg_id': msg.conversation_message_id}
+    Task(time_at, remind, dumps(args)).add()
+    return await msg.answer('Хорошо, напомню через часик!')
+

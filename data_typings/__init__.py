@@ -53,3 +53,10 @@ class EventPayload(TypedDict):
 class CtxBufferData(TypedDict):
     payload: BuffPayload
     event: MessageEventMin
+
+
+class RemindArgs(TypedDict):
+    user_id: int
+    peer_id: int
+    msg_id: int
+    text: str
