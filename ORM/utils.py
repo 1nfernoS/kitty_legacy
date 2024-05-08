@@ -20,17 +20,17 @@ class Task(Base):
     task_id: Mapped[int] = mapped_column(primary_key=True)
     task_time_at: Mapped[datetime]
     task_exec_target: Mapped[str] = mapped_column(String(127))
-    task_args: Mapped[str] = mapped_column(String(255))
+    task_args: Mapped[str] = mapped_column(String(255), nullable=True)
     task_created_at: Mapped[datetime] = mapped_column(default=now())
     task_active: Mapped[bool] = mapped_column(default=True)
     task_regular: Mapped[bool] = mapped_column(default=False)
 
-    def __init__(self, time_at: datetime, exec_target: Callable, args: str, is_regular: bool = False):
+    def __init__(self, time_at: datetime, exec_target: Callable, args: str | None, is_regular: bool = False):
         super().__init__()
         self.task_time_at = time_at
         self.task_exec_target = exec_target.__name__
         self.task_args = args
-        self.is_regular = is_regular
+        self.task_regular = is_regular
         self.task_created_at = now()
         self.task_active = True
         return
