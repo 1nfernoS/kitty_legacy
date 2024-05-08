@@ -1,6 +1,6 @@
 from typing import List, TypedDict, Optional, Dict, Literal
 
-from data_typings.enums import EventPayloadAction
+from .enums import EventPayloadAction
 from vbml import Pattern
 
 from vkbottle.tools.dev.mini_types.bot import MessageEventMin
