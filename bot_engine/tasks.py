@@ -114,3 +114,24 @@ async def check_tasks():
                 task.task_active = False
             s.add(task)
         s.commit()
+
+
+async def check_tasks():
+    today = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    regular_tasks = [
+        Task(today.replace(year=today.year + today.month // 12,
+                           month=today.month % 12 + 1,
+                           day=2, hour=12, minute=30, second=0, microsecond=0),
+             elites, None, True)
+    ]
+    with (session() as s):
+        task_list: List[Task] = [task for task in
+                                 (s.query(Task.task_exec_target)
+                                  .filter(Task.task_active == 1).all())]
+    for task in regular_tasks:
+        if task.task_exec_target not in task_list:
+            task.add()
+    return
+
+
+bot.loop_wrapper.on_startup.append(check_tasks())
