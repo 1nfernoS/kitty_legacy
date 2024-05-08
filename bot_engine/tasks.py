@@ -79,6 +79,24 @@ async def elites(params: None = None):
     return next_execute
 
 
+async def bill(params: None = None):
+    """
+    Task to make bill announcement
+    Runs every month at 1st and 15th day at 10:30
+    """
+    from . import api
+    today = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    await api.messages.send(chat_id=GUILD_CHAT_ID,
+                            message='Сегодня будет списан налог!\n'
+                                    'Все дружно написали "мой профиль" и "баланс" (без кавычек)\n\n@all',
+                            random_id=0)
+    if today.day > 1:
+        next_execute = today.replace(day=1, month=today.month % 12 + 1, year=today.year + today.month // 12)
+    else:
+        next_execute = today.replace(day=15)
+    return next_execute.replace(hour=10, minute=30, second=0, microsecond=0)
+
+
 async def remind(params: RemindArgs):
     from . import api
     msg = f"{await format_name(params['user_id'], 'nom')}, напоминаю"
@@ -116,22 +134,27 @@ async def check_tasks():
         s.commit()
 
 
-async def check_tasks():
+async def ensure_tasks():
     today = now().replace(hour=0, minute=0, second=0, microsecond=0)
     regular_tasks = [
         Task(today.replace(year=today.year + today.month // 12,
                            month=today.month % 12 + 1,
                            day=2, hour=12, minute=30, second=0, microsecond=0),
-             elites, None, True)
+             elites, None, True),
+        Task(today.replace(year=today.year if today.day < 15 else today.year + today.month // 12,
+                           month=today.month if today.day < 15 else today.month % 12 + 1,
+                           day=15 if today.day < 15 else 1,
+                           hour=10, minute=30, second=0, microsecond=0),
+             bill, None, True)
     ]
     with (session() as s):
         task_list: List[Task] = [task for task in
                                  (s.query(Task.task_exec_target)
                                   .filter(Task.task_active == 1).all())]
     for task in regular_tasks:
-        if task.task_exec_target not in task_list:
+        if task.task_exec_target not in [i.task_exec_target for i in task_list]:
             task.add()
     return
 
 
-bot.loop_wrapper.on_startup.append(check_tasks())
+bot.loop_wrapper.on_startup.append(ensure_tasks())
