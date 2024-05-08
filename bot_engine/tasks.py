@@ -1,19 +1,83 @@
-from typing import List
+from typing import List, Dict
 from json import loads
-from datetime import timedelta
+from datetime import timedelta, datetime
 
+from sqlalchemy import func
 from vkbottle_types.codegen.objects import MessagesForward
 
 from data_typings import RemindArgs
 
-from config import GUILD_CHAT_ID
+from config import GUILD_CHAT_ID, LEADER_CHAT_ID
 
-from ORM import session
+from ORM import session, LogsElites, User
 from ORM.utils import Task
-
+from data_typings.enums import guild_roles
+from utils import now
 from utils.formatters import format_name
 import utils
 from . import bot
+from resources import emoji
+
+
+async def elites(params: None = None):
+    """
+    Task to make monthly elites report
+    Runs every month at 2nd day at 12:30
+    """
+    from . import api
+    today = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    last_month = today.replace(year=today.year - 12 // (today.month + 11),
+                               month=1 + (12 + today.month - 2) % 12)
+    first_day = last_month.replace(day=1)
+    last_day = first_day.replace(year=first_day.year + first_day.month // 12,
+                                 month=first_day.month % 12 + 1)
+    with session() as s:
+        elites_logs: Dict[int, int] = {user[0]: int(user[1]) for user in
+                                       (s.query(LogsElites.user_id, func.sum(LogsElites.count))
+                                        .filter(LogsElites.timestamp.between(first_day, last_day))
+                                        .group_by(LogsElites.user_id).all())}
+        # noinspection PyTypeChecker
+        guild_users: List[User] = (s.query(User)
+                                   .filter(User.role_name.in_(guild_roles)).all())
+
+    stats = {'more': 0, 'less': 0, 'equal': 0, 'none': 0}
+    msg = f"Статистика по сдаче элитных трофеев за {now().strftime('%m.%Y')}\n\n"
+    for user in guild_users:
+        if user.stat_level < 100:
+            limit = 40
+        elif user.stat_level < 250:
+            limit = 90
+        else:
+            limit = 120
+        elites_count = elites_logs.get(user.user_id, 0)
+
+        if elites_count > limit:
+            stats['more'] += 1
+            msg += emoji.check
+        elif elites_count == limit:
+            stats['equal'] += 1
+            msg += emoji.check
+        elif elites_count == 0:
+            stats['none'] += 1
+            msg += emoji.cancel
+        elif elites_count < limit:
+            stats['less'] += 1
+            msg += emoji.cancel
+        msg += (f"{await format_name(user.user_id, 'nom')}({user.stat_level}): "
+                f"{elites_count}/{limit}{emoji.elite_trophy}\n")
+    msg += (f"\nИтого\n"
+            f"Сверх нормы: {stats['more']}\n"
+            f"Сдали ровно: {stats['equal']}\n"
+            f"Недобрали: {stats['less']}\n"
+            f"Не сдали ничего: {stats['none']}")
+    await api.messages.send(chat_id=LEADER_CHAT_ID,
+                            random_id=0,
+                            message=msg,
+                            )
+    next_execute = today.replace(year=today.year + today.month // 12,
+                                 month=today.month % 12 + 1,
+                                 day=2, hour=12, minute=30, second=0, microsecond=0)
+    return next_execute
 
 
 async def remind(params: RemindArgs):
