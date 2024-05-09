@@ -179,7 +179,7 @@ async def check_tasks():
         for task in task_list:
             if task.task_time_at > now_:
                 continue
-            next_time = await globals()[task.task_exec_target](loads(task.task_args))
+            next_time = await globals()[task.task_exec_target](loads(task.task_args) if task.task_args else None)
             if task.task_regular:
                 if not isinstance(next_time, datetime):
                     raise AttributeError(
