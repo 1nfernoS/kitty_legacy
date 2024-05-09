@@ -9,7 +9,7 @@ from data_typings import RemindArgs
 
 from config import GUILD_CHAT_ID, LEADER_CHAT_ID
 
-from ORM import session, LogsElites, User
+from ORM import session, LogsElites, User, LogsSiege
 from ORM.utils import Task
 from data_typings.enums import guild_roles
 from utils import now
@@ -107,6 +107,53 @@ async def bill(params: None = None):
     return next_execute.replace(hour=10, minute=30, second=0, microsecond=0)
 
 
+async def siege_stats(params: None = None):
+    """
+    Task to make siege stats report
+    Runs every Wednesday at 22:05
+    """
+    from . import api
+    today = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    users = await api.messages.get_conversation_members(peer_id=2e9 + GUILD_CHAT_ID)
+    with session() as s:
+        siege_logs: Dict[int, str] = {u.user_id: u.guild for u in
+                                      s.query(LogsSiege)
+                                      .filter(LogsSiege.timestamp >= today.date()).all()}
+        guild_users: List[int] = [u.user_id for u in
+                                  s.query(User)
+                                  .filter(User.role_name.in_(guild_roles)).all()]
+    msg = f"Статистика по осаде {today.strftime('%d.%m.%Y')}\n\n"
+    frequent_guild = max(siege_logs.values(), key=lambda x: list(siege_logs.values()).count(x))
+    stats = {'reported': 0, 'not_reported': 0, 'reported_wrong': 0}
+
+    for user in users.items:
+        if user.member_id not in guild_users:
+            continue
+        guild = siege_logs.get(user.member_id, None)
+        if not guild:
+            stats['not_reported'] += 1
+            msg += f"{emoji.cancel} {await format_name(user.member_id, 'nom')}\n"
+            continue
+
+        if guild == frequent_guild:
+            stats['reported'] += 1
+        else:
+            stats['reported_wrong'] += 1
+        msg += f"{emoji.check} {await format_name(user.member_id, 'nom')} - {guild}\n"
+    msg += (f"\nБольшая часть согильдийцев была в осаде на {frequent_guild}\n"
+            f"{emoji.check}: {stats['reported']}; "
+            f"{emoji.flag}: {stats['reported_wrong']}; "
+            f"{emoji.cancel}: {stats['not_reported']}")
+
+    await api.messages.send(chat_id=LEADER_CHAT_ID,
+                            random_id=0,
+                            message=msg,
+                            disable_mentions=True
+                            )
+    next_run = today + timedelta(days=7 if today.isoweekday() == 3 else ((7 + 3 - today.isoweekday()) % 7))
+    return next_run.replace(hour=22, minute=5, second=0, microsecond=0)
+
+
 async def remind(params: RemindArgs):
     from . import api
     msg = f"{await format_name(params['user_id'], 'nom')}, напоминаю"
@@ -155,7 +202,11 @@ async def ensure_tasks():
                            month=today.month if today.day < 15 else today.month % 12 + 1,
                            day=15 if today.day < 15 else 1,
                            hour=10, minute=30, second=0, microsecond=0),
-             bill, None, True)
+             bill, None, True),
+        Task(today.replace(hour=22, minute=5, second=0, microsecond=0) +
+             timedelta(days=7 if today.isoweekday() == 3
+             else ((7 + 3 - today.isoweekday()) % 7)),
+             siege_stats, None, True)
     ]
     with (session() as s):
         task_list: List[Task] = [task for task in
