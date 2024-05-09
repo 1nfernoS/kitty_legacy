@@ -30,21 +30,30 @@ async def elites(params: None = None):
     first_day = last_month.replace(day=1)
     last_day = first_day.replace(year=first_day.year + first_day.month // 12,
                                  month=first_day.month % 12 + 1)
+    users = await api.messages.get_conversation_members(peer_id=2e9 + GUILD_CHAT_ID)
     with session() as s:
         elites_logs: Dict[int, int] = {user[0]: int(user[1]) for user in
                                        (s.query(LogsElites.user_id, func.sum(LogsElites.count))
                                         .filter(LogsElites.timestamp.between(first_day, last_day))
                                         .group_by(LogsElites.user_id).all())}
         # noinspection PyTypeChecker
-        guild_users: List[User] = (s.query(User)
-                                   .filter(User.role_name.in_(guild_roles)).all())
-
+        guild_users: Dict[int, int] = {u.user_id: u.stat_level for u in
+                                       (s.query(User)
+                                        .filter(User.role_name.in_(guild_roles)).all())}
     stats = {'more': 0, 'less': 0, 'equal': 0, 'none': 0}
     msg = f"Статистика по сдаче элитных трофеев за {now().strftime('%m.%Y')}\n\n"
-    for user in guild_users:
-        if user.stat_level < 100:
+    for user in users.items:
+        if user.member_id < 0:
+            continue
+        if user.member_id in guild_users:
+            continue
+        user_level = guild_users.get(user.member_id, 0)
+
+        if user_level == 0:
+            continue
+        elif user_level < 100:
             limit = 40
-        elif user.stat_level < 250:
+        elif user_level < 250:
             limit = 90
         else:
             limit = 120
@@ -62,7 +71,7 @@ async def elites(params: None = None):
         elif elites_count < limit:
             stats['less'] += 1
             msg += emoji.cancel
-        msg += (f"{await format_name(user.user_id, 'nom')}({user.stat_level}): "
+        msg += (f"{await format_name(user.user_id, 'nom')}({user_level}): "
                 f"{elites_count}/{limit}{emoji.elite_trophy}\n")
     msg += (f"\nИтого\n"
             f"Сверх нормы: {stats['more']}\n"
@@ -72,6 +81,7 @@ async def elites(params: None = None):
     await api.messages.send(chat_id=LEADER_CHAT_ID,
                             random_id=0,
                             message=msg,
+                            disable_mentions=True
                             )
     next_execute = today.replace(year=today.year + today.month // 12,
                                  month=today.month % 12 + 1,
