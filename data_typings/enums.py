@@ -50,6 +50,7 @@ class Roles(IntEnum):
 class EventPayloadAction(StrEnum):
     BUFF = auto()
     REMOVE = auto()
+    RESTORE = auto()
 
 
 guild_roles = (Roles.creator, Roles.leader, Roles.captain, Roles.officer, Roles.guild, Roles.newbie)

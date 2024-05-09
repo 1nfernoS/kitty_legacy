@@ -14,8 +14,8 @@ class DbData(TypedDict):
     dialect: str
     connector: str
     port: Optional[int]
-    
-    
+
+
 class BuffAnswer(TypedDict):
     critical: Pattern
     success: Pattern
@@ -43,11 +43,15 @@ class BuffPayload(TypedDict):
     chat_id: int
     from_id: int
     buff_id: int
-    
+
+
+class AnnounceRestorePayload(TypedDict):
+    note_id: int
+
 
 class EventPayload(TypedDict):
     action: EventPayloadAction
-    data: Optional[BuffPayload]
+    data: Optional[BuffPayload | AnnounceRestorePayload]
 
 
 class CtxBufferData(TypedDict):

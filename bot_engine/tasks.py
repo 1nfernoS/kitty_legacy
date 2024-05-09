@@ -3,15 +3,16 @@ from json import loads
 from datetime import timedelta, datetime
 
 from sqlalchemy import func
+from vkbottle import Keyboard, Callback, KeyboardButtonColor, VKAPIError
 from vkbottle_types.codegen.objects import MessagesForward
 
-from data_typings import RemindArgs
+from data_typings import RemindArgs, EventPayload, AnnounceRestorePayload
 
 from config import GUILD_CHAT_ID, LEADER_CHAT_ID
 
 from ORM import session, LogsElites, User, LogsSiege
-from ORM.utils import Task
-from data_typings.enums import guild_roles
+from ORM.utils import Task, Notes
+from data_typings.enums import guild_roles, EventPayloadAction
 from utils import now
 from utils.formatters import format_name
 from . import bot
@@ -154,6 +155,51 @@ async def siege_stats(params: None = None):
     return next_run.replace(hour=22, minute=5, second=0, microsecond=0)
 
 
+async def announcements(params: None = None):
+    from . import api
+    now_ = now()
+    with session() as s:
+        # noinspection PyTypeChecker
+        messages: List[Notes] = s.query(Notes).filter(Notes.is_active == 1).all()
+    msg = f"{emoji.task} Объявления гильдии!"
+    if not messages:
+        msg += '\nТут пока пусто...'
+    for message in messages:
+        name = await format_name(message.note_author, 'nom')
+        if message.expires_in < now_:
+            message.remove()
+            notify = (f'Ваше объявление {message.note_id} истекло - {message.note_text}\n'
+                      f'Чтобы вернуть его нажмите кнопку ниже')
+
+            data: AnnounceRestorePayload = {'note_id': message.note_id}
+            payload: EventPayload = {'action': EventPayloadAction.RESTORE, 'data': data}
+            kbd = Keyboard(inline=True)
+            kbd.add(Callback('Восстановить', payload), KeyboardButtonColor.POSITIVE)
+
+            try:
+                await api.messages.send(peer_id=message.note_author,
+                                        message=notify,
+                                        random_id=0,
+                                        keyboard=kbd.get_json())
+            except VKAPIError[902, 901]:
+                notify = f"{name}, разрешите сообщения, чтобы я уведомлял об этом в лс\n" + notify
+                await api.messages.send(chat_id=GUILD_CHAT_ID,
+                                        message=notify,
+                                        random_id=0,
+                                        keyboard=kbd.get_json())
+            continue
+
+        msg += f"\n -{emoji.tab}{name}: {message.note_text}"
+    await api.messages.send(chat_id=GUILD_CHAT_ID,
+                            random_id=0,
+                            message=msg,
+                            disable_mentions=True
+                            )
+
+    next_run = now_.replace(minute=0, second=0, microsecond=0) + timedelta(hours=2)
+    return next_run
+
+
 async def remind(params: RemindArgs):
     from . import api
     msg = f"{await format_name(params['user_id'], 'nom')}, напоминаю"
@@ -206,7 +252,9 @@ async def ensure_tasks():
         Task(today.replace(hour=22, minute=5, second=0, microsecond=0) +
              timedelta(days=7 if today.isoweekday() == 3
              else ((7 + 3 - today.isoweekday()) % 7)),
-             siege_stats, None, True)
+             siege_stats, None, True),
+        Task(today.replace(hour=(now().hour//2)*2, minute=0, second=0, microsecond=0),
+             announcements, None, True)
     ]
     with (session() as s):
         task_list: List[Task] = [task for task in
