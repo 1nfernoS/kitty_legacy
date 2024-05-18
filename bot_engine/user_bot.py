@@ -10,7 +10,7 @@ from bot_engine.rules import OverseerRule
 from resources.items import buff_races_dict
 from .middlewares import CheckBuffMiddleware
 
-from resources import puzzles
+from resources import get_puzzles
 
 
 user_labeler = UserLabeler()
@@ -33,7 +33,7 @@ def _transfer_money(user_from: int, user_to: int, amount: int):
     return
 
 
-@user_labeler.private_message(OverseerRule(puzzles['buffs']['critical']))
+@user_labeler.private_message(OverseerRule(get_puzzles()['buffs']['critical']))
 async def critical_buff(msg: MessageMin, user_id: int):
     self_user = await msg.ctx_api.users.get()
     self_user = self_user[0]
@@ -42,7 +42,7 @@ async def critical_buff(msg: MessageMin, user_id: int):
     return
 
 
-@user_labeler.private_message(OverseerRule(puzzles['buffs']['success']))
+@user_labeler.private_message(OverseerRule(get_puzzles()['buffs']['success']))
 async def ordinary_buff(msg: MessageMin, user_id: int):
     self_user = await msg.ctx_api.users.get()
     self_user = self_user[0]
@@ -51,7 +51,7 @@ async def ordinary_buff(msg: MessageMin, user_id: int):
 
 
 # noinspection PyUnusedLocal
-@user_labeler.private_message(OverseerRule(puzzles['buffs']['possible']))
+@user_labeler.private_message(OverseerRule(get_puzzles()['buffs']['possible']))
 async def failed_buff(msg: MessageMin, user_id: int, voices: int = 0):
     from loguru import logger
     if voices:

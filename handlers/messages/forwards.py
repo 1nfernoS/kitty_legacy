@@ -14,7 +14,7 @@ from bot_engine import labeler, api
 from bot_engine.rules import FwdPitRule
 from config import DISCOUNT_PERCENT, creator_id
 from data_typings.enums import guild_roles, SiegeRole
-from resources import emoji, puzzles
+from resources import emoji, get_puzzles
 from resources.items import symbols_answers
 from utils.formatters import frequent_letter
 from utils.datetime import now
@@ -71,7 +71,7 @@ async def symbol_guesser(msg: MessageMin, regex: str):
 
 @labeler.message(FwdPitRule(f'<text1>\n<text2>\n\n&#8987;Путешествие продолжается...\n<notice>'))
 async def travel_check(msg: MessageMin, notice: str):
-    res: Literal["safe", "warn", "danger"] | None = puzzles['travel'].get(notice)
+    res: Literal["safe", "warn", "danger"] | None = get_puzzles()['travel'].get(notice)
     if not res:
         return await msg.answer(f"(+?) Неизвестное событие, сообщите в полигон или [id{creator_id}|ему]")
     answer: Dict[Literal["safe", "warn", "danger"], str] = {
@@ -92,6 +92,7 @@ async def travel_check(msg: MessageMin, notice: str):
 @labeler.message(FwdPitRule(['Дверь с грохотом открывается<text>\n\n<text1>', 'Дверь с грохотом открывается<text>']))
 async def door_answer(msg: MessageMin, text: str):
     res: str | None = None
+    puzzles = get_puzzles()
     for riddle in puzzles['door']:
         if riddle in text:
             res = puzzles['door'][riddle]
@@ -113,6 +114,7 @@ async def door_answer(msg: MessageMin, text: str):
                             '\nОсталось определить, какая именно это была книга...'))
 async def book_answer(msg: MessageMin, page_text: str):
     res: str | None = None
+    puzzles = get_puzzles()
     for page in puzzles['pages']:
         if page in page_text:
             res = puzzles['pages'][page]
