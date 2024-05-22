@@ -8,7 +8,7 @@ from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError
 from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
-from ORM import session, User, Task
+from ORM import session, User, Task, Item
 from bot_engine.tasks import remind
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
@@ -16,6 +16,7 @@ from data_typings import RemindArgs
 
 from data_typings.enums import RoleAccess, guild_roles
 from resources.emoji import gold
+from resources.items import allowed_items
 from utils import now
 from utils.formatters import format_name
 from utils.math import commission_price
@@ -116,4 +117,24 @@ async def set_remind(msg: MessageMin, text: str | None = None):
     args: RemindArgs = {'user_id': msg.from_id, 'peer_id': msg.peer_id, 'text': text or '', 'msg_id': msg.conversation_message_id}
     Task(time_at, remind, dumps(args)).add()
     return await msg.answer('Хорошо, напомню через часик!')
+
+
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      text=['хочу <item>'])
+async def want_item(msg: MessageMin, item: str):
+    if len(item) < 3:
+        return await msg.answer(f'Добавь пару символов, чтобы их было хотя бы 3')
+    with session() as s:
+        search: List[Item] = s.query(Item).filter(Item.id.in_(allowed_items) == 1, Item.name.contains(item)).all()
+        if not search:
+            return await msg.answer(f'Что-то не могу найти {item}')
+        for result in search:
+            if result.name.lower() == item.lower():
+                search = [result]
+                break
+
+    if len(search) > 1:
+        return await msg.answer(f'Я нашел следующее ({len(search)}):\n' + '\n'.join([i.name for i in search]))
+    else:
+        return await msg.answer(f'Я нашел следующее:\n' + search[0].name)
 
