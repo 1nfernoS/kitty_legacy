@@ -17,8 +17,7 @@ buff_classes_dict: BuffClasses = {'apostol': 14264, 'warlock': 14093, 'paladin':
                                   'light_inc': 14257}
 
 ingredients_drops: List[int] = [14436, 14453, 14452, 14438, 14440, 14441, 14628, 14627, 14442, 14460, 14462, 14470,
-                                14472, 14550]
-ingredients_special: List[int] = [14439, 14491, 14527]  # water and seashell
+                                14472, 14550, 14439, 14491]
 
 weapons: List[int] = [13702, 13736, 13739, 13741, 13743, 13745, 13747, 13749, 13751, 13753, 13755, 13757, 13759, 13761,
                       13763, 13765, 13767, 13769, 13771, 13773, 13775, 13777, 13779, 13781, 13783, 13785, 13787, 13789,
@@ -37,15 +36,24 @@ belts: List[int] = [14030, 14032, 14034, 14036, 14038, 14040, 14042]
 boots: List[int] = [14854, 14856, 14858, 14860, 14862, 14864, 14866]
 charms: List[int] = [13856, 13859, 13861, 13863, 13865, 13867, 13869]
 
-base_equipment: List[int] = weapons + armors + special_slot + gloves + belts + boots + charms
 
 rings_drops: List[int] = [14238, 14316, 14318, 14240, 14242]
 rings_special: List[int] = [14679, 14681, 14683, 14922, 15011, 14244, 14248, 14246, 15208, 14250, 15238, 14495]
 materials_raw: List[int] = [14793, 14794, 14795, 14796]
 materials_processed: List[int] = [14797, 14798, 14799, 14800]
-maps: List[int] = [14660, 14661, 14662, 14663, 14664, 14665, 14963, 14270, 15301]
+elites_punch: List[int] = [15301]
+scroll_sharpen: List[int] = [14207]
+maps: List[int] = [14661, 14662, 14663, 14664, 14665, 14963, 14270]
+
+base_equipment: List[int] = weapons + armors + special_slot + gloves + belts + boots + charms
+materials_all: List[int] = materials_raw + materials_processed
+rings_all: List[int] = rings_drops + rings_special
+
+allowed_items: List[int] = ingredients_drops + base_equipment + materials_all + maps + rings_all
+
 potions_other: List[int] = [14609, 14610, 14487, 14449, 14629, 14447]  # potion of regeneration is special
 potions_heal: List[int] = [13414, 13432, 13433, 13434, 13435, 13436, 13437]
+
 
 adm_ingredients: List[int] = [14527, 14454, 14549, 14521, 14523]
 adm_items: List[int] = [14128, 14130, 14132, 14134, 14136, 14138, 14140, 14142, 14144, 14302, 14304, 14306, 14573,
