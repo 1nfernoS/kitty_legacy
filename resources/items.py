@@ -49,7 +49,6 @@ base_equipment: List[int] = weapons + armors + special_slot + gloves + belts + b
 materials_all: List[int] = materials_raw + materials_processed
 rings_all: List[int] = rings_drops + rings_special
 
-allowed_items: List[int] = ingredients_drops + base_equipment + materials_all + maps + rings_all
 
 potions_other: List[int] = [14609, 14610, 14487, 14449, 14629, 14447]  # potion of regeneration is special
 potions_heal: List[int] = [13414, 13432, 13433, 13434, 13435, 13436, 13437]
@@ -78,6 +77,8 @@ ordinary_books_passive: List[int] = [13639, 13642, 13644, 13646, 13648, 13650, 1
                                      14986, 14988, 15219, 15359, 15363]
 
 ordinary_books_all = ordinary_books_active + ordinary_books_passive
+
+allowed_items: List[int] = ingredients_drops + base_equipment + materials_all + maps + rings_all + ordinary_books_all
 
 equipped_to_ordinary_active: Dict[int, int] = {
     13408: 13580, 13409: 13581, 13547: 13582, 13553: 13583, 13586: 13592, 13593: 13595, 13598: 13600, 13601: 13603,
