@@ -11,7 +11,7 @@ from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 from ORM import session, User, Task, Item
 from bot_engine.tasks import remind
 
-from config import GUILD_NAME, NOTE_RULES, NOTE_ALL
+from config import GUILD_NAME, NOTE_RULES, NOTE_ALL, storager_token, storager_chat
 from data_typings import RemindArgs
 
 from data_typings.enums import RoleAccess, guild_roles
@@ -136,5 +136,15 @@ async def want_item(msg: MessageMin, item: str):
     if len(search) > 1:
         return await msg.answer(f'Я нашел следующее ({len(search)}):\n' + '\n'.join([i.name for i in search]))
     else:
-        return await msg.answer(f'Я нашел следующее:\n' + search[0].name)
+        from vkbottle import API
+        storager_api = API(token=storager_token)
+        await storager_api.messages.send(
+            chat_id=storager_chat,
+            message=f"Выдать {search[0].name.replace('Книга - ', '').lower()}",
+            random_id=0,
+            reply_to=(await storager_api.messages.get_by_conversation_message_id(
+                peer_id=int(2e9+storager_chat),
+                conversation_message_ids=[msg.conversation_message_id])).items[0].id
+        )
+        return
 
