@@ -64,3 +64,14 @@ class RemindArgs(TypedDict):
     peer_id: int
     msg_id: int
     text: str
+
+
+class CtxStorageData(TypedDict):
+    item_id: int
+    item_name: str
+    count: int
+
+
+class CtxData(TypedDict):
+    buffs: Dict[int, CtxBufferData]
+    storage: List[Dict[int, CtxStorageData]]

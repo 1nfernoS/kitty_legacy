@@ -1,3 +1,5 @@
+from typing import Dict
+
 from vkbottle import CtxStorage
 from vkbottle.tools.dev.mini_types.bot import MessageEventMin
 from vkbottle_types.events import GroupEventType
@@ -5,6 +7,7 @@ from vkbottle_types.events import GroupEventType
 from bot_engine import labeler, api, bot
 from bot_engine.rules import ActionEventRule
 from bot_engine.user_bot import buff_loop
+from data_typings import CtxBufferData
 from data_typings.enums import EventPayloadAction
 
 
@@ -17,14 +20,13 @@ async def remove(event: MessageEventMin):
 @labeler.raw_event(GroupEventType.MESSAGE_EVENT, MessageEventMin, ActionEventRule(EventPayloadAction.BUFF))
 async def buff(event: MessageEventMin):
     res = await event.show_snackbar('Накладываю баф...')
-    if CtxStorage().contains(event.payload['data']['from_id']):
+    ctx: Dict[int, CtxBufferData] = CtxStorage().get('buffs')
+    if ctx.get(event.payload['data']['from_id']):
         return await api.messages.edit(event.peer_id, 'Баффер занят, повторите позднее',
                                        conversation_message_id=event.conversation_message_id)
     else:
-        CtxStorage().set(
-            event.payload['data']['from_id'],
-            {'payload': event.payload['data'], 'event': event}
-        )
+        ctx.update({event.payload['data']['from_id']: {'payload': event.payload['data'], 'event': event}})
+        CtxStorage().set('buffs', ctx)
 
     await bot.loop.create_task(buff_loop(event.payload['data']))
 
