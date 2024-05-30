@@ -1,9 +1,11 @@
 from datetime import timedelta
 from json import dumps
-from typing import List
+from typing import List, Dict
+
+from sqlalchemy import or_
 
 from vkbottle.tools.dev.mini_types.bot import MessageMin
-from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError
+from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError, CtxStorage
 
 from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
@@ -12,7 +14,7 @@ from ORM import session, User, Task, Item
 from bot_engine.tasks import remind
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL, storager_token, storager_chat
-from data_typings import RemindArgs
+from data_typings import RemindArgs, CtxStorageData
 
 from data_typings.enums import RoleAccess, guild_roles
 from resources.emoji import gold
@@ -119,32 +121,32 @@ async def set_remind(msg: MessageMin, text: str | None = None):
     return await msg.answer('Хорошо, напомню через часик!')
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
-                      text=['хочу <item>'])
-async def want_item(msg: MessageMin, item: str):
-    if len(item) < 3:
-        return await msg.answer(f'Добавь пару символов, чтобы их было хотя бы 3')
+@labeler.chat_message(AccessRule(RoleAccess.take_books),
+                      text=['хочу <item> - <count:int> штук', 'хочу <item>'])
+async def want_item(msg: MessageMin, item: str, count: int = 1):
     with session() as s:
-        search: List[Item] = s.query(Item).filter(Item.id.in_(allowed_items) == 1, Item.name.contains(item)).all()
+        search: Item | None = s.query(Item).filter(
+            Item.id.in_(allowed_items),
+            or_(Item.name.ilike(item.lower()), Item.name.ilike(f"Книга - {item.lower()}"))
+        ).first()
         if not search:
             return await msg.answer(f'Что-то не могу найти {item}')
-        for result in search:
-            if result.name.lower() == item.lower():
-                search = [result]
-                break
 
-    if len(search) > 1:
-        return await msg.answer(f'Я нашел следующее ({len(search)}):\n' + '\n'.join([i.name for i in search]))
-    else:
-        from vkbottle import API
-        storager_api = API(token=storager_token)
-        await storager_api.messages.send(
-            chat_id=storager_chat,
-            message=f"Выдать {search[0].name.replace('Книга - ', '').lower()}",
-            random_id=0,
-            reply_to=(await storager_api.messages.get_by_conversation_message_id(
-                peer_id=int(2e9+storager_chat),
-                conversation_message_ids=[msg.conversation_message_id])).items[0].id
-        )
-        return
+    from vkbottle import API
+    storager_api = API(token=storager_token)
+    reply_to = await storager_api.messages.get_by_conversation_message_id(
+            peer_id=int(2e9+storager_chat),
+            conversation_message_ids=[msg.conversation_message_id])
+    await storager_api.messages.send(
+        chat_id=storager_chat,
+        message=f"Выдать {search.name.replace('Книга - ', '').lower()} - {count} штук",
+        random_id=0,
+        reply_to=reply_to.items[0].id
+    )
+    storage_ctx: Dict[int, List[CtxStorageData]] = CtxStorage().get('storage')
+    current_requests: List[CtxStorageData] = storage_ctx.get(msg.from_id, [])
+    current_requests.append({'item_id': int(search.id), 'item_name': str(search.name), 'count': count})
+    storage_ctx.update({msg.from_id: current_requests})
+    CtxStorage().set('storage', storage_ctx)
+    return
 
