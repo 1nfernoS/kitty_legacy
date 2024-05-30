@@ -1,11 +1,14 @@
-from vkbottle import VKAPIError
+from typing import Dict, List
+
+from vkbottle import VKAPIError, CtxStorage
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
-from ORM import session, LogsItems, Item, LogsMoney, User
+from ORM import session, LogsItems, Item, LogsMoney, User, Role
 from bot_engine import labeler, api
 from bot_engine.rules import OverseerRule
 from config import GUILD_NAME
 import profile_api
+from data_typings import CtxStorageData
 from data_typings.enums import ItemAction, ChangeMoneyAction, Roles
 from resources import emoji, items
 from utils.formatters import balance_message_addition, date_diff, format_name
@@ -22,26 +25,26 @@ async def item_put(msg: MessageMin, user_id: int, count: int, item_name: str):
             Item.has_price == 1).first()
     if not item:
         return  # TODO: log error
-    
+
     LogsItems(user_id, ItemAction.PUT, 0, item.id, count).make_log()
-    
+
     if item.id not in items.ordinary_books_all:
         return
-    
+
     price = await profile_api.get_price(item.id)
     if price <= 0:
         return
-    
+
     with session() as s:
         # noinspection PyTypeChecker
         user: User = s.query(User).filter(User.user_id == user_id).first()
-        user.balance += price*count
+        user.balance += price * count
         s.add(user)
         s.commit()
-        
+
         answer = f"{await format_name(user.user_id, 'nom')}, пополняю баланс на {price * count}{emoji.gold}"
         answer += f"({count}*{price})\n" if count > 1 else "\n" + balance_message_addition(user.balance)
-    
+
     return await msg.answer(answer)
 
 
@@ -55,12 +58,12 @@ async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
             Item.has_price == 1).first()
     if not item:
         return  # TODO: log error
-    
+
     LogsItems(0, ItemAction.TAKE, user_id, item.id, count).make_log()
-    
+
     if item.id not in items.ordinary_books_all:
         return
-    
+
     price = await profile_api.get_price(item.id)
     if price <= 0:
         return
@@ -68,13 +71,13 @@ async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
     with session() as s:
         # noinspection PyTypeChecker
         user: User = s.query(User).filter(User.user_id == user_id).first()
-        user.balance -= price*count
+        user.balance -= price * count
         s.add(user)
         s.commit()
-        
+
         answer = f"{await format_name(user.user_id, 'nom')}, списываю с баланса {price * count}{emoji.gold}"
         answer += f"({count}*{price})\n" if count > 1 else "\n" + balance_message_addition(user.balance)
-    
+
     return await msg.answer(answer)
 
 
@@ -134,7 +137,6 @@ async def profile_message(msg: MessageMin, user_id: int, name: str, class_name: 
                           gold: int, scatter: int,
                           strength: int, agility: int, endurance: int,
                           luck: int, attack: int, defence: int):
-
     msg_to_edit = await msg.answer('Читаю профиль...')
 
     class_name = class_name[:class_name.find(' (')] if ' (' in class_name else class_name
@@ -188,3 +190,48 @@ async def profile_message(msg: MessageMin, user_id: int, name: str, class_name: 
         pass
     return await api.messages.edit(msg_to_edit.peer_id, answer,
                                    conversation_message_id=msg_to_edit.conversation_message_id)
+
+
+@labeler.chat_message(OverseerRule(f"{emoji.item}[id<user_id:int>|<name>], "
+                                   f"Вы получили со склада: <emoji><count:int>*<item_name>!"
+                                   f"\n&#128275;Места на складе: <place:int"))
+async def storage_item_get(msg: MessageMin, user_id: int, item_name: str, count: int):
+    storage_ctx: Dict[int, List[CtxStorageData]] = CtxStorage().get('storage')
+    requests: List[CtxStorageData] = storage_ctx.get(user_id, [])
+    answer = ''
+    if not requests:
+        return
+    for r in requests:
+        if not (r['item_name'].replace('Книга - ', '').capitalize() == item_name.capitalize()
+                and r['count'] == count):
+            continue
+
+        requests.remove(r)
+
+        if 'Книга - ' not in r['item_name']:
+            break
+        item_price: int = await profile_api.get_price(r['item_id'])
+
+        with session() as s:
+            user: User | None = s.query(User).filter(User.user_id == user_id).first()
+            if not user.user_role.can_balance:
+                break
+
+            user.balance -= count * item_price
+            if count > 1:
+                answer = (f"Выдал {count}*{item_name.capitalize()}, "
+                          f"списываю с баланса {emoji.gold}{count * item_price}({count} * {emoji.gold}{item_price})")
+            else:
+                answer = f"Выдал {item_name.capitalize()}, списываю с баланса {emoji.gold}{count * item_price}"
+            answer += f"\nОсталось на счету: {emoji.gold}{user.balance}"
+            s.add(user)
+            s.commit()
+        break
+
+    storage_ctx.update({user_id: requests})
+    CtxStorage().set('storage', storage_ctx)
+
+    if not answer:
+        return
+    else:
+        return await msg.answer(answer)
