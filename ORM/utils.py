@@ -73,6 +73,7 @@ class Announcements(Base):
         with session() as s:
             s.add(self)
             s.commit()
+            return self.note_id
 
     def restore(self):
         self.is_active = True
