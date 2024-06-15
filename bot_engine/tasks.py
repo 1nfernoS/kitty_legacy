@@ -124,27 +124,30 @@ async def siege_stats(params: None = None):
                                   s.query(User)
                                   .filter(User.role_name.in_(guild_roles)).all()]
     msg = f"Статистика по осаде {today.strftime('%d.%m.%Y')}\n\n"
-    frequent_guild = max(siege_logs.values(), key=lambda x: list(siege_logs.values()).count(x))
-    stats = {'reported': 0, 'not_reported': 0, 'reported_wrong': 0}
+    if not guild_users or not siege_logs:
+        msg += 'В гильдии никого нет или нет записей об осаде'
+    else:
+        frequent_guild = max(siege_logs.values(), key=lambda x: list(siege_logs.values()).count(x))
+        stats = {'reported': 0, 'not_reported': 0, 'reported_wrong': 0}
 
-    for user in users.items:
-        if user.member_id not in guild_users:
-            continue
-        guild = siege_logs.get(user.member_id, None)
-        if not guild:
-            stats['not_reported'] += 1
-            msg += f"{emoji.cancel} {await format_name(user.member_id, 'nom')}\n"
-            continue
+        for user in users.items:
+            if user.member_id not in guild_users:
+                continue
+            guild = siege_logs.get(user.member_id, None)
+            if not guild:
+                stats['not_reported'] += 1
+                msg += f"{emoji.cancel} {await format_name(user.member_id, 'nom')}\n"
+                continue
 
-        if guild == frequent_guild:
-            stats['reported'] += 1
-        else:
-            stats['reported_wrong'] += 1
-        msg += f"{emoji.check} {await format_name(user.member_id, 'nom')} - {guild}\n"
-    msg += (f"\nБольшая часть согильдийцев была в осаде на {frequent_guild}\n"
-            f"{emoji.check}: {stats['reported']}; "
-            f"{emoji.flag}: {stats['reported_wrong']}; "
-            f"{emoji.cancel}: {stats['not_reported']}")
+            if guild == frequent_guild:
+                stats['reported'] += 1
+            else:
+                stats['reported_wrong'] += 1
+            msg += f"{emoji.check} {await format_name(user.member_id, 'nom')} - {guild}\n"
+        msg += (f"\nБольшая часть согильдийцев была в осаде на {frequent_guild}\n"
+                f"{emoji.check}: {stats['reported']}; "
+                f"{emoji.flag}: {stats['reported_wrong']}; "
+                f"{emoji.cancel}: {stats['not_reported']}")
 
     await api.messages.send(chat_id=LEADER_CHAT_ID,
                             random_id=0,
