@@ -10,7 +10,7 @@ from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError, CtxSto
 from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
-from ORM import session, User, Task, Item
+from ORM import session, User, Task, Item, Announcements
 from bot_engine.tasks import remind
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL, storager_token, storager_chat
@@ -150,3 +150,47 @@ async def want_item(msg: MessageMin, item: str, count: int = 1):
     CtxStorage().set('storage', storage_ctx)
     return
 
+
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      text=['добавить пост <text>', 'пост добавить <text>',
+                            'добавить объявление <text>', 'объявление добавить <text>',
+                            'добавить объяву <text>', 'объява добавить <text>',
+                            'добавить обьяву <text>', 'обьява добавить <text>'])
+async def announce_add(msg: MessageMin, text: str):
+    text = text.encode('cp1251', 'xmlcharrefreplace').decode('cp1251')
+    if len(text) > 255:
+        return msg.answer(f"Максимум 255 символов в объявлении, у вас {len(text)} (эмодзи едят по 6-10 символов)")
+    note_id = Announcements(msg.from_id, text).save()
+    return await msg.answer(f"Добавил объявление в газету!\nНомер объявления: {note_id}")
+
+
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      text=['удалить пост <note_id:int>', 'пост удалить <note_id:int>',
+                            'удалить объявление <note_id:int>', 'объявление удалить <note_id:int>',
+                            'удалить объяву <note_id:int>', 'объява удалить <note_id:int>',
+                            'удалить обьяву <note_id:int>', 'обьява удалить <note_id:int>'])
+async def announce_remove(msg: MessageMin, note_id: int):
+    with session() as s:
+        announce: Announcements | None = s.query(Announcements).filter(Announcements.note_id == note_id).first()
+    if not announce or announce.note_author != msg.from_id:
+        return await msg.answer(f"Объявление под номером {note_id} не существует или создано не вами!")
+    announce.remove()
+    return await msg.answer(f"Объявления {note_id} удалено!")
+
+
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      text=['пост мои', 'мои пост',
+                            'мои посты', 'посты мои',
+                            'пост мой', 'мой пост',
+                            'мой посты', 'посты мой'])
+async def announce_list(msg: MessageMin):
+    with session() as s:
+        announcements: List[Announcements] | None = s.query(Announcements).filter(
+            Announcements.is_active == 1,
+            Announcements.note_author == msg.from_id).all()
+    if not announcements:
+        return msg.answer('У вас сейчас нет действующих объявлений')
+    res: str = f'Ваши объявления ({len(announcements)}):'
+    for a in announcements:
+        res += f"\n{a.note_id}:\t{a.note_text} (до {a.expires_in.strftime('%d.%m %H:%M')})"
+    return await msg.answer(res)
