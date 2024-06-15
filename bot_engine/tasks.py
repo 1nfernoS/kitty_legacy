@@ -11,7 +11,7 @@ from data_typings import RemindArgs, EventPayload, AnnounceRestorePayload
 from config import GUILD_CHAT_ID, LEADER_CHAT_ID
 
 from ORM import session, LogsElites, User, LogsSiege
-from ORM.utils import Task, Notes
+from ORM.utils import Task, Announcements
 from data_typings.enums import guild_roles, EventPayloadAction
 from utils import now
 from utils.formatters import format_name
@@ -160,7 +160,7 @@ async def announcements(params: None = None):
     now_ = now()
     with session() as s:
         # noinspection PyTypeChecker
-        messages: List[Notes] = s.query(Notes).filter(Notes.is_active == 1).all()
+        messages: List[Announcements] = s.query(Announcements).filter(Announcements.is_active == 1).all()
     msg = f"{emoji.task} Объявления гильдии!"
     if not messages:
         msg += '\nТут пока пусто...'

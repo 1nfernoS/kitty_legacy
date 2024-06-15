@@ -9,7 +9,7 @@ from ORM import Base, session
 from utils.datetime import now
 
 
-__all__ = ["Task", "Notes"]
+__all__ = ["Task", "Announcements"]
 
 
 # noinspection PyTypeChecker
@@ -52,8 +52,8 @@ class Task(Base):
 
 
 # noinspection PyTypeChecker
-class Notes(Base):
-    __tablename__ = 'notes'
+class Announcements(Base):
+    __tablename__ = 'announcements'
 
     note_id: Mapped[int] = mapped_column(primary_key=True)
     note_author: Mapped[int]
@@ -86,7 +86,7 @@ class Notes(Base):
         return
 
     def __str__(self):
-        return f"<Note({int(self.note_author)}): {self.note_text[:25]}<{self.expires_in}]>"
+        return f"<Announcement({self.note_author}): {self.note_text[:25]}<{self.expires_in}]>"
 
     def __repr__(self):
-        return f"<Note({int(self.note_author)}): {self.note_text[:25]}<{self.expires_in}]>"
+        return f"<Announcement({self.note_author}): {self.note_text[:25]}<{self.expires_in}]>"

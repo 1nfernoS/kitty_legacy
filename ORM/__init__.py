@@ -22,7 +22,7 @@ __all__ = ["session", "Base",
            "Item", "Role", "User",
            "BufferType", "BuffCmd", "BuffUser",
            "LogsCommand", "LogsMoney", "LogsItems", "LogsSiege", "LogsElites",
-           "Task", "Notes"]
+           "Task", "Announcements"]
 
 
 if __name__ == 'ORM':
