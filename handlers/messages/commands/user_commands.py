@@ -194,3 +194,20 @@ async def announce_list(msg: MessageMin):
     for a in announcements:
         res += f"\n{a.note_id}:\t{a.note_text} (до {a.expires_in.strftime('%d.%m %H:%M')})"
     return await msg.answer(res)
+
+
+@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
+async def other_role(msg: MessageMin):
+    user_id = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
+    with session() as s:
+        user: User | None = s.query(User).filter(User.user_id == user_id).first()
+        user_role: Role = user.user_role
+    await msg.answer(f'Роль пользователя - {user_role.alias.capitalize()}')
+
+
+@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['role', 'роль'])
+async def role(msg: MessageMin):
+    with session() as s:
+        user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
+        user_role: Role = user.user_role
+    await msg.answer(f'Ваша роль - {user_role.alias.capitalize()}')

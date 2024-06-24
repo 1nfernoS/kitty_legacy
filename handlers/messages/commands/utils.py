@@ -22,23 +22,6 @@ async def ping(msg: MessageMin):
     await msg.answer(choice(answers))
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
-async def other_role(msg: MessageMin):
-    user_id = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
-    with session() as s:
-        user: User | None = s.query(User).filter(User.user_id == user_id).first()
-        user_role: Role = user.user_role
-    await msg.answer(f'Роль пользователя - {user_role.alias.capitalize()}')
-
-
-@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['role', 'роль'])
-async def role(msg: MessageMin):
-    with session() as s:
-        user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
-        user_role: Role = user.user_role
-    await msg.answer(f'Ваша роль - {user_role.alias.capitalize()}')
-
-
 @labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['грязными <money:int>', 'dirty <money:int>'])
 async def dirty(msg: MessageMin, money: int):
     try:
