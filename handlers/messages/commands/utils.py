@@ -6,8 +6,6 @@ from vkbottle.tools.dev.mini_types.bot import MessageMin
 from bot_engine import labeler
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
-from ORM import session, User, Role
-
 from utils.math import pure_price, commission_price
 
 

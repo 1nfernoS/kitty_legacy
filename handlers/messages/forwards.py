@@ -11,9 +11,9 @@ import profile_api
 import utils
 from ORM import Item, session, User, LogsElites, LogsSiege
 from bot_engine import labeler, api
-from bot_engine.rules import FwdPitRule
+from bot_engine.rules import AccessRule, FwdPitRule
 from config import DISCOUNT_PERCENT, creator_id
-from data_typings.enums import guild_roles, SiegeRole
+from data_typings.enums import guild_roles, SiegeRole, RoleAccess
 from resources import emoji, get_puzzles
 from resources.items import symbols_answers
 from utils.formatters import frequent_letter
@@ -21,7 +21,8 @@ from utils.datetime import now
 from utils.parsers import cross_signs
 
 
-@labeler.message(FwdPitRule(f'{emoji.item}1*<item_name>\n{emoji.gold}Цена: <item_price:int> золота'))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule(f'{emoji.item}1*<item_name>\n{emoji.gold}Цена: <item_price:int> золота'))
 async def dark_vendor(msg: MessageMin, item_name: str, item_price: int):
     msg_to_edit = await msg.answer('Проверяю торговца...')
     with session() as s:
@@ -47,7 +48,8 @@ async def dark_vendor(msg: MessageMin, item_name: str, item_price: int):
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.message(FwdPitRule(f'Символы:\n<regex>\nОтправьте букву или текст:'))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule(f'Символы:\n<regex>\nОтправьте букву или текст:'))
 async def symbol_guesser(msg: MessageMin, regex: str):
     msg_to_edit = await msg.answer('Символы, сейчас...')
     with session() as s:
@@ -69,7 +71,8 @@ async def symbol_guesser(msg: MessageMin, regex: str):
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.message(FwdPitRule(f'<text1>\n<text2>\n\n&#8987;Путешествие продолжается...\n<notice>'))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule(f'<text1>\n<text2>\n\n&#8987;Путешествие продолжается...\n<notice>'))
 async def travel_check(msg: MessageMin, notice: str):
     res: Literal["safe", "warn", "danger"] | None = get_puzzles()['travel'].get(notice)
     if not res:
@@ -89,7 +92,9 @@ async def travel_check(msg: MessageMin, notice: str):
     return res
 
 
-@labeler.message(FwdPitRule(['Дверь с грохотом открывается<text>\n\n<text1>', 'Дверь с грохотом открывается<text>']))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule(['Дверь с грохотом открывается<text>\n\n<text1>',
+                                  'Дверь с грохотом открывается<text>']))
 async def door_answer(msg: MessageMin, text: str):
     res: str | None = None
     puzzles = get_puzzles()
@@ -109,9 +114,10 @@ async def door_answer(msg: MessageMin, text: str):
     return res
 
 
-@labeler.message(FwdPitRule('Книгу целиком уже не спасти, но одна из страниц уцелела. Кусок текста на ней гласит: '
-                            '«...<page_text>...».'
-                            '\nОсталось определить, какая именно это была книга...'))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule('Книгу целиком уже не спасти, но одна из страниц уцелела. Кусок текста на ней гласит: '
+                                 '«...<page_text>...».'
+                                 '\nОсталось определить, какая именно это была книга...'))
 async def book_answer(msg: MessageMin, page_text: str):
     res: str | None = None
     puzzles = get_puzzles()
@@ -131,8 +137,9 @@ async def book_answer(msg: MessageMin, page_text: str):
     return res
 
 
-@labeler.message(FwdPitRule('Вы успешно обменяли элитные трофеи (<count:int>) на репутацию гильдии!'
-                            '\n&#127941;Текущая репутация гильдии: <all_count:int>'))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule('Вы успешно обменяли элитные трофеи (<count:int>) на репутацию гильдии!'
+                                 '\n&#127941;Текущая репутация гильдии: <all_count:int>'))
 async def elite_answer(msg: MessageMin, count: int):
     date = datetime.utcfromtimestamp(msg.fwd_messages[0].date)
     today = now()
@@ -167,13 +174,13 @@ async def elite_answer(msg: MessageMin, count: int):
     return await msg.reply(answer)
 
 
-@labeler.message(FwdPitRule(
-    f'Перед каждым проходом другими искателями приключений нацарапаны различные надписи, которые, '
-    f'видимо, могут помочь определить, куда ведет конкретная дорога.\n'
-    '&#128681;Западный путь: "<west_1>" и "<west_2>"\n'
-    '&#128681;Северный путь: "<north_1>" и "<north_2>"\n'
-    '&#128681;Восточный путь: "<east_1>" и "<east_2>"\n\n'
-    'Осталось выбрать, какому направлению последовать...'))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule(f'Перед каждым проходом другими искателями приключений нацарапаны различные надписи, '
+                                 f'которые, видимо, могут помочь определить, куда ведет конкретная дорога.\n'
+                                 '&#128681;Западный путь: "<west_1>" и "<west_2>"\n'
+                                 '&#128681;Северный путь: "<north_1>" и "<north_2>"\n'
+                                 '&#128681;Восточный путь: "<east_1>" и "<east_2>"\n\n'
+                                 'Осталось выбрать, какому направлению последовать...'))
 async def cross_answer(msg: MessageMin, west_1: str, west_2: str, north_1: str, north_2: str, east_1: str, east_2: str):
     west, north, east = (cross_signs(*i) for i in ([west_1, west_2], [north_1, north_2], [east_1, east_2]))
     answer = "Направления ведут к\n"
@@ -190,8 +197,9 @@ async def cross_answer(msg: MessageMin, west_1: str, west_2: str, north_1: str, 
     return res
 
 
-@labeler.message(FwdPitRule('&#9989;Вы успешно присоединились к осадному лагерю гильдии <guild>!\n'
-                            '&#128100;Ваша роль: <siege_role> (+<count:int>&#<emoji:int>;)'))
+@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+                      FwdPitRule('&#9989;Вы успешно присоединились к осадному лагерю гильдии <guild>!\n'
+                                 '&#128100;Ваша роль: <siege_role> (+<count:int>&#<emoji:int>;)'))
 async def siege_answer(msg: MessageMin, guild: str, siege_role: str, count: int):
     date = datetime.utcfromtimestamp(msg.fwd_messages[0].date)
 
@@ -217,3 +225,7 @@ async def siege_answer(msg: MessageMin, guild: str, siege_role: str, count: int)
 
     answer = f"Зарегистрировал твое участие в осаде за {guild} ({siege_role} +{count})"
     return await msg.reply(answer)
+
+# @labeler.message(FwdPitRule(f"<text1>\n"))
+# async def wait_for_timer(msg: MessageMin):
+#     return

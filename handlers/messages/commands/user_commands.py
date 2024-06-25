@@ -10,7 +10,7 @@ from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError, CtxSto
 from bot_engine import labeler, api
 from bot_engine.rules import AccessRule, FwdOrReplyUserRule
 
-from ORM import session, User, Task, Item, Announcements
+from ORM import session, User, Task, Item, Announcements, Role
 from bot_engine.tasks import remind
 
 from config import GUILD_NAME, NOTE_RULES, NOTE_ALL, storager_token, storager_chat

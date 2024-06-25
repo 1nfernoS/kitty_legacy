@@ -13,7 +13,7 @@ from resources.emoji import gold
 from utils.formatters import balance_message_addition
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])
+@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])
 async def change_role(msg: MessageMin, name: str):
     name = name.lower()
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
@@ -38,7 +38,7 @@ async def change_role(msg: MessageMin, name: str):
         return await msg.answer(f"Теперь пользователь имеет права {new_role.alias.capitalize()}")
 
 
-@labeler.message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator), text=['kick', 'кик'])
+@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator), text=['kick', 'кик'])
 async def ban_user(msg: MessageMin):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     if target_id == msg.from_id:
