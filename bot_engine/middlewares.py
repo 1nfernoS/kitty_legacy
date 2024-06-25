@@ -1,7 +1,7 @@
 from vkbottle import BaseMiddleware, CtxStorage
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 
-from ORM import session, BuffUser, User
+from ORM import session, BuffUser, User, LogsCommand
 from data_typings import CtxBufferData
 
 from config import OVERSEER_BOT
@@ -82,4 +82,24 @@ class CheckBuffMiddleware(BaseMiddleware[BaseMessageMin]):
         import asyncio
         await asyncio.sleep(1)  # delay to avoid TooManyRequests Error
         await self.event.ctx_api.messages.mark_as_read(peer_id=OVERSEER_BOT)
+        return
+
+
+class LogCommandMiddleware(BaseMiddleware[BaseMessageMin]):
+    """
+    Middleware to log command if handler has been executed
+    """
+
+    async def post(self):
+        if not self.handlers:
+            return
+        for handler in self.handlers:
+            msg = self.event
+            on_user_id = msg.fwd_messages[0].user_id if msg.fwd_messages \
+                else msg.reply_message.from_user.id if msg.reply_message \
+                else None
+            on_user_text = msg.fwd_messages[0].text if msg.fwd_messages \
+                else msg.reply_message.text if msg.reply_message \
+                else None
+            LogsCommand(self.event.from_id, str(handler), self.event.text, on_user_id, on_user_text).make_log()
         return
