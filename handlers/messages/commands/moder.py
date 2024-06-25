@@ -63,11 +63,6 @@ async def ban_user(msg: MessageMin):
 
 
 def _change_balance(target_id: int, value: int, action: Literal['change', 'set']) -> str:
-    try:
-        value = int(value)
-    except ValueError:
-        return 'Это не число (можно использовать + или - и число'
-
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == target_id).first()
         if not user:
@@ -86,7 +81,7 @@ def _change_balance(target_id: int, value: int, action: Literal['change', 'set']
 
 
 @labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
-                      text=['чек = <value>', 'check = <value>'])
+                      text=['чек = <value:int>', 'check = <value:int>'])
 async def set_balance(msg: MessageMin, value: int):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     answer = _change_balance(target_id, value, 'set')
@@ -94,7 +89,7 @@ async def set_balance(msg: MessageMin, value: int):
 
 
 @labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
-                      text=['чек <value>', 'check <value>'])
+                      text=['чек <value:int>', 'check <value:int>'])
 async def change_balance(msg: MessageMin, value: int):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     answer = _change_balance(target_id, value, 'change')
