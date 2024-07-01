@@ -21,6 +21,7 @@ def session() -> Session:
 __all__ = ["session", "Base",
            "Item", "Role", "User",
            "BufferType", "BuffCmd", "BuffUser",
+           "PuzzleType", "PuzzleAnswer",
            "LogsCommand", "LogsMoney", "LogsItems", "LogsSiege", "LogsElites",
            "Task", "Announcements"]
 
@@ -30,6 +31,7 @@ if __name__ == 'ORM':
     from .buffer import *
     from .utils import *
     from .logging import *
+    from .puzzles import *
     
     Base.metadata.create_all(__engine)
     pass
