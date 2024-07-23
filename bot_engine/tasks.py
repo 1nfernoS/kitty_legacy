@@ -3,7 +3,7 @@ from json import loads
 from datetime import timedelta, datetime
 
 from sqlalchemy import func
-from vkbottle import Keyboard, Callback, KeyboardButtonColor, VKAPIError
+from vkbottle import Keyboard, Callback, KeyboardButtonColor, VKAPIError, Bot
 from vkbottle_types.codegen.objects import MessagesForward
 
 from data_typings import RemindArgs, EventPayload, AnnounceRestorePayload
@@ -269,4 +269,21 @@ async def ensure_tasks():
     return
 
 
+async def check_labelers(bot: Bot) -> None:
+    from bot_engine import HelpGroup
+    from resources import help_groups
+    for handler in bot.labeler.message_view.handlers:
+        command_group = None
+        for rule in handler.rules:
+            if isinstance(rule, HelpGroup):
+                command_group = rule
+        if not command_group:
+            raise RuntimeError(f"Handler {handler} has no CmdGroup rule")
+        if command_group.cmd_group not in help_groups:
+            raise RuntimeError(f"File \"resources\\help_descriptions.json\""
+                               f" has no '{command_group.cmd_group}' group description")
+    return
+
+
+bot.loop_wrapper.on_startup.append(check_labelers(bot))
 bot.loop_wrapper.on_startup.append(ensure_tasks())

@@ -5,7 +5,7 @@ from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 from ORM import session, LogsItems, Item, LogsMoney, User, Role
 from bot_engine import labeler, api
-from bot_engine.rules import OverseerRule
+from bot_engine.rules import OverseerRule, HelpGroup
 from config import GUILD_NAME
 import profile_api
 from data_typings import CtxStorageData
@@ -15,7 +15,8 @@ from utils.formatters import balance_message_addition, date_diff, format_name
 from utils.datetime import now
 
 
-@labeler.chat_message(OverseerRule(f"&#<emo1>;[id<user_id:int>|<name>], Вы положили на склад: "
+@labeler.chat_message(HelpGroup('item_storage'),
+                      OverseerRule(f"&#<emo1>;[id<user_id:int>|<name>], Вы положили на склад: "
                                    f"&#<emo2>;<count:int>*<item_name>!\n"
                                    f"&#128275;Места на складе: <space:int>"))
 async def item_put(msg: MessageMin, user_id: int, count: int, item_name: str):
@@ -48,7 +49,8 @@ async def item_put(msg: MessageMin, user_id: int, count: int, item_name: str):
     return await msg.answer(answer)
 
 
-@labeler.chat_message(OverseerRule(f"&#<emo1>;[id<user_id:int>|<name>], Вы взяли со склада: "
+@labeler.chat_message(HelpGroup('item_storage'),
+                      OverseerRule(f"&#<emo1>;[id<user_id:int>|<name>], Вы взяли со склада: "
                                    f"&#<emo2>;<count:int>*<item_name>!\n"
                                    f"&#128275;Места на складе: <space:int>"))
 async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
@@ -82,7 +84,8 @@ async def item_take(msg: MessageMin, user_id: int, count: int, item_name: str):
 
 
 # noinspection PyUnusedLocal
-@labeler.chat_message(OverseerRule([f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: "
+@labeler.chat_message(HelpGroup('item_transfer'),
+                      OverseerRule([f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: "
                                     f"&#<emo>;<count:int>*<item_name> от игрока [id<id_from:int>|<name_from>]!",
                                     f"&#<emo_item>;[id<id_to:int>|<name_to>], получено: &#<emo>;<item_name>"
                                     f" от игрока [id<id_from:int>|<name_from>]!"]))
@@ -95,7 +98,8 @@ async def item_transfer(msg: MessageMin, id_from: int, id_to: int, item_name: st
     return
 
 
-@labeler.chat_message(OverseerRule(f"{emoji.gold}[id<user_id>|<name>], Вы взяли <count:int> золота из казны."))
+@labeler.chat_message(HelpGroup('item_storage'),
+                      OverseerRule(f"{emoji.gold}[id<user_id>|<name>], Вы взяли <count:int> золота из казны."))
 async def money_take(msg: MessageMin, user_id: int, count: int):
     LogsMoney(user_id, ChangeMoneyAction.SUB, count, 0, 'FROM STORAGE').make_log()
     with session() as s:
@@ -108,8 +112,9 @@ async def money_take(msg: MessageMin, user_id: int, count: int):
     return await msg.answer(answer)
 
 
-@labeler.chat_message(OverseerRule(
-    f"{emoji.gold}[id<user_id>|<name>], Вы положили <count:int> золота в казну (комиссия 10%)."))
+@labeler.chat_message(HelpGroup('item_storage'),
+                      OverseerRule(f"{emoji.gold}[id<user_id>|<name>], "
+                                   f"Вы положили <count:int> золота в казну (комиссия 10%)."))
 async def money_put(msg: MessageMin, user_id: int, count: int):
     LogsMoney(user_id, ChangeMoneyAction.ADD, count, 0, 'TO STORAGE').make_log()
     with session() as s:
@@ -122,7 +127,8 @@ async def money_put(msg: MessageMin, user_id: int, count: int):
     return await msg.answer(answer)
 
 
-@labeler.chat_message(OverseerRule(
+@labeler.chat_message(HelpGroup('profile'),
+                      OverseerRule(
     f'[id<user_id:int>|<name>], Ваш профиль:\n'
     f'&#128100;Класс: <class_name>, <races>\n'
     f'&#128101;Гильдия: <guild_name>\n'
@@ -192,7 +198,8 @@ async def profile_message(msg: MessageMin, user_id: int, name: str, class_name: 
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.chat_message(OverseerRule(f"{emoji.item}[id<user_id:int>|<name>], "
+@labeler.chat_message(HelpGroup('skip'),
+                      OverseerRule(f"{emoji.item}[id<user_id:int>|<name>], "
                                    f"Вы получили со склада: <emoji><count:int>*<item_name>!"
                                    f"\n&#128275;Места на складе: <place:int"))
 async def storage_item_get(msg: MessageMin, user_id: int, item_name: str, count: int):

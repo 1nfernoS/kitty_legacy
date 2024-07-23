@@ -8,7 +8,7 @@ from vkbottle.tools.dev.mini_types.bot import MessageMin
 from vkbottle import Keyboard, KeyboardButtonColor, OpenLink, VKAPIError, CtxStorage
 
 from bot_engine import labeler, api
-from bot_engine.rules import AccessRule, FwdOrReplyUserRule
+from bot_engine.rules import AccessRule, FwdOrReplyUserRule, HelpGroup
 
 from ORM import session, User, Task, Item, Announcements, Role
 from bot_engine.tasks import remind
@@ -24,7 +24,7 @@ from utils.formatters import format_name
 from utils.math import commission_price
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
+@labeler.chat_message(HelpGroup('balance'), FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
                       text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
 async def other_balance(msg: MessageMin):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
@@ -37,7 +37,8 @@ async def other_balance(msg: MessageMin):
     return await msg.answer(message)
 
 
-@labeler.chat_message(AccessRule(RoleAccess.balance_access), text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
+@labeler.chat_message(HelpGroup('balance'), AccessRule(RoleAccess.balance_access),
+                      text=['баланс', 'счет', 'счёт', 'balance', 'wallet'])
 async def balance(msg: MessageMin):
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
@@ -48,7 +49,7 @@ async def balance(msg: MessageMin):
     return await msg.answer(message)
 
 
-@labeler.chat_message(AccessRule(RoleAccess.change_balance),
+@labeler.chat_message(HelpGroup('all_balance'), AccessRule(RoleAccess.change_balance),
                       text=['баланс все', 'счет все', 'счёт все', 'balance all', 'wallet all'])
 async def all_balance(msg: MessageMin):
     with session() as s:
@@ -66,7 +67,7 @@ async def all_balance(msg: MessageMin):
     return await msg.answer('Отправил список в лс')
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('notes'), AccessRule(RoleAccess.bot_access),
                       text=['заметки', 'rules', 'notes', 'правила'])
 async def notes(msg: MessageMin):
     kbd = Keyboard(inline=True)
@@ -75,7 +76,7 @@ async def notes(msg: MessageMin):
     return await msg.answer('Заметки:', keyboard=kbd.get_json())
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
+@labeler.chat_message(HelpGroup('transfer_money'), FwdOrReplyUserRule(), AccessRule(RoleAccess.balance_access),
                       text=['перевести <amount:int>', 'transfer <amount:int>'])
 async def transfer_money(msg: MessageMin, amount: int):
     try:
@@ -112,7 +113,7 @@ async def transfer_money(msg: MessageMin, amount: int):
         return await msg.answer(f'Перевел {amount}{gold}!\n На счету осталось {user_from.balance}{gold}')
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('remind'), AccessRule(RoleAccess.bot_access),
                       text=['напомни <text>', 'напомни', 'remind <text>', 'remind'])
 async def set_remind(msg: MessageMin, text: str | None = None):
     time_at = now() + timedelta(hours=1)
@@ -121,7 +122,7 @@ async def set_remind(msg: MessageMin, text: str | None = None):
     return await msg.answer('Хорошо, напомню через часик!')
 
 
-@labeler.chat_message(AccessRule(RoleAccess.take_books),
+@labeler.chat_message(HelpGroup('want_item'), AccessRule(RoleAccess.take_books),
                       text=['хочу <item> - <count:int> штук', 'хочу <item>'])
 async def want_item(msg: MessageMin, item: str, count: int = 1):
     with session() as s:
@@ -151,7 +152,7 @@ async def want_item(msg: MessageMin, item: str, count: int = 1):
     return
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('add_announce'), AccessRule(RoleAccess.bot_access),
                       text=['добавить пост <text>', 'пост добавить <text>',
                             'добавить объявление <text>', 'объявление добавить <text>',
                             'добавить объяву <text>', 'объява добавить <text>',
@@ -164,7 +165,7 @@ async def announce_add(msg: MessageMin, text: str):
     return await msg.answer(f"Добавил объявление в газету!\nНомер объявления: {note_id}")
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('del_announce'), AccessRule(RoleAccess.bot_access),
                       text=['удалить пост <note_id:int>', 'пост удалить <note_id:int>',
                             'удалить объявление <note_id:int>', 'объявление удалить <note_id:int>',
                             'удалить объяву <note_id:int>', 'объява удалить <note_id:int>',
@@ -178,7 +179,7 @@ async def announce_remove(msg: MessageMin, note_id: int):
     return await msg.answer(f"Объявления {note_id} удалено!")
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('list_announce'), AccessRule(RoleAccess.bot_access),
                       text=['пост мои', 'мои пост',
                             'мои посты', 'посты мои',
                             'пост мой', 'мой пост',
@@ -196,7 +197,7 @@ async def announce_list(msg: MessageMin):
     return await msg.answer(res)
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
+@labeler.chat_message(HelpGroup('role'), FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role', 'роль'])
 async def other_role(msg: MessageMin):
     user_id = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     with session() as s:
@@ -205,7 +206,7 @@ async def other_role(msg: MessageMin):
     await msg.answer(f'Роль пользователя - {user_role.alias.capitalize()}')
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['role', 'роль'])
+@labeler.chat_message(HelpGroup('role'), AccessRule(RoleAccess.bot_access), text=['role', 'роль'])
 async def role(msg: MessageMin):
     with session() as s:
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()

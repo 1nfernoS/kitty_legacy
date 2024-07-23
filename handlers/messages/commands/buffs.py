@@ -8,12 +8,12 @@ from resources.items import buff_classes_dict
 from ORM import session, BuffUser
 
 from bot_engine import labeler
-from bot_engine.rules import AccessRule
+from bot_engine.rules import AccessRule, HelpGroup
 
 from profile_api.user_requests import get_buffer_voices
 
 
-@labeler.chat_message(AccessRule(RoleAccess.take_buffs), text=['апо', 'apo'])
+@labeler.chat_message(HelpGroup('apostol'), AccessRule(RoleAccess.take_buffs), text=['апо', 'apo'])
 async def buffers_apostol(msg: MessageMin):
     from resources.keyboards import apostol
     with session() as s:
@@ -45,7 +45,8 @@ async def buffers_apostol(msg: MessageMin):
     return
 
 
-@labeler.chat_message(AccessRule(RoleAccess.take_buffs), text=['прокли', 'дебаф', 'дебафф', 'debuff', 'debuf'])
+@labeler.chat_message(HelpGroup('warlock'), AccessRule(RoleAccess.take_buffs),
+                      text=['прокли', 'дебаф', 'дебафф', 'debuff', 'debuf'])
 async def buffers_warlock(msg: MessageMin):
     from resources.keyboards import warlock
     with session() as s:
@@ -75,7 +76,8 @@ async def buffers_warlock(msg: MessageMin):
     return
 
 
-@labeler.chat_message(AccessRule(RoleAccess.take_buffs), text=['травма', 'травмы', 'очистка', 'trauma'])
+@labeler.chat_message(HelpGroup('paladin'), AccessRule(RoleAccess.take_buffs),
+                      text=['травма', 'травмы', 'очистка', 'trauma'])
 async def buffers_paladin(msg: MessageMin):
     from resources.keyboards import paladin, crusader, light_inc
     with session() as s:

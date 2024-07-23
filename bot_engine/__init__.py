@@ -6,7 +6,7 @@ from config import group_token, ALLOWED_CHATS
 # noinspection PyUnresolvedReferences
 import ORM
 
-from .rules import WhiteListChatRule
+from .rules import WhiteListChatRule, HelpGroup
 from .middlewares import RegisterMiddleware, LogCommandMiddleware
 
 api = API(group_token)

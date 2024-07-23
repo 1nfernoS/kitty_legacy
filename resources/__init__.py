@@ -1,5 +1,10 @@
 from json import loads
+from typing import Dict
+
 from data_typings import Puzzles
+
+
+help_groups: Dict[str, str]
 
 
 def get_puzzles() -> Puzzles:
@@ -14,3 +19,8 @@ def get_puzzles() -> Puzzles:
         buffs = loads(f.read())
         puzzles.update({'buffs': buffs['buffs']})
         return puzzles
+
+
+with open('resources/help_descriptions.json', 'r') as f:
+    help_groups = loads(f.read())
+
