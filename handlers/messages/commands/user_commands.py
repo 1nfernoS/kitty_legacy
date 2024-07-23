@@ -212,3 +212,55 @@ async def role(msg: MessageMin):
         user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
         user_role: Role = user.user_role
     await msg.answer(f'Ваша роль - {user_role.alias.capitalize()}')
+
+
+@labeler.chat_message(HelpGroup('help'), AccessRule(RoleAccess.bot_access), text=['помощь', 'help', 'команды'])
+async def help_commands(msg: MessageMin):
+    from loguru import logger
+    from utils import get_labeler
+    from resources import help_groups
+    from bot_engine import rules
+    from vkbottle.dispatch.rules.base import PeerRule, VBMLRule
+
+
+    with session() as s:
+        user: User | None = s.query(User).filter(User.user_id == msg.from_id).first()
+        user_role: Role = user.user_role
+
+    labeler = get_labeler()
+    for handler in labeler.message_view.handlers:
+        if any([isinstance(rule, rules.OverseerRule) for rule in handler.rules]):
+            continue
+        logger.info(f"Handler {handler.handler.__name__}")
+
+        texts: List[str] | None = None
+        is_fwd: bool = False
+        description: str = ''
+        for rule in handler.rules:
+            if isinstance(rule, rules.WhiteListChatRule) or isinstance(rule, PeerRule):
+                continue
+            if isinstance(rule, rules.FwdPitRule):
+                is_fwd = True
+                continue
+            if isinstance(rule, rules.AccessRule):
+                if not getattr(user_role, rule.require):
+                    logger.warning('Access not granted')
+                    break
+                continue
+            if isinstance(rule, rules.HelpGroup):
+                description = help_groups.get(rule.cmd_group)
+                logger.info(f"\t -> {description}")
+                continue
+            if isinstance(rule, VBMLRule):
+                descriptor = {'int': 'ЧИСЛО', 'str': "ТЕКСТ"}
+                texts = [p.text for p in rule.patterns]
+
+                logger.info(f"\t{texts}")
+                continue
+
+            logger.info(f'\t{rule}')
+
+        pass
+
+    await msg.answer(f'Logs in logs')
+
