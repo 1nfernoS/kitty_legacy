@@ -6,11 +6,11 @@ from ORM import session, BuffCmd, BuffUser, User
 from config import OVERSEER_BOT, APO_PAYMENT
 from data_typings import BuffPayload
 
-from bot_engine.rules import OverseerRule
 from resources.items import buff_races_dict
-from .middlewares import CheckBuffMiddleware
-
 from resources import get_puzzles
+
+from .rules import OverseerRule
+from .middlewares import CheckBuffMiddleware
 
 
 user_labeler = UserLabeler()
