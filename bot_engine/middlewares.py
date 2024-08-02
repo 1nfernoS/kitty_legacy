@@ -101,5 +101,7 @@ class LogCommandMiddleware(BaseMiddleware[BaseMessageMin]):
             on_user_text = msg.fwd_messages[0].text if msg.fwd_messages \
                 else msg.reply_message.text if msg.reply_message \
                 else None
-            LogsCommand(self.event.from_id, str(handler), self.event.text, on_user_id, on_user_text).make_log()
+            if len(self.event.text) > 255:
+                self.event.text = f'{self.event.text[:252]}...'
+            LogsCommand(self.event.from_id, str(handler.handler.__name__), self.event.text, on_user_id, on_user_text).make_log()
         return
