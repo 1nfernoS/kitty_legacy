@@ -137,7 +137,7 @@ def _extract_url(url: str) -> Dict[str, str]:
     return {i.split('=')[0]: i.split('=')[1] for i in args.split('&')}
 
 
-@labeler.private_message(AccessRule(RoleAccess.bot_access),
+@labeler.private_message(HelpGroup('skip'), AccessRule(RoleAccess.bot_access),
                          text=['/buffer <link_1> <link_2>', '/buffer\n<link_1>\n<link_2>'])
 async def buffer_register(msg: MessageMin, link_1: str, link_2: str):
     from vkbottle_types.codegen.objects import MessagesConversationPeerType
