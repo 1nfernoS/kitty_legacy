@@ -11,7 +11,7 @@ import profile_api
 import utils
 from ORM import Item, session, User, LogsElites, LogsSiege
 from bot_engine import labeler, api
-from bot_engine.rules import AccessRule, FwdPitRule
+from bot_engine.rules import AccessRule, FwdPitRule, HelpGroup
 from config import DISCOUNT_PERCENT, creator_id
 from data_typings.enums import guild_roles, SiegeRole, RoleAccess
 from resources import emoji, get_puzzles
@@ -21,7 +21,7 @@ from utils.datetime import now
 from utils.parsers import cross_signs
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('vendor'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule(f'{emoji.item}1*<item_name>\n{emoji.gold}Цена: <item_price:int> золота'))
 async def dark_vendor(msg: MessageMin, item_name: str, item_price: int):
     msg_to_edit = await msg.answer('Проверяю торговца...')
@@ -48,7 +48,7 @@ async def dark_vendor(msg: MessageMin, item_name: str, item_price: int):
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('puzzle_answer'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule(f'Символы:\n<regex>\nОтправьте букву или текст:'))
 async def symbol_guesser(msg: MessageMin, regex: str):
     msg_to_edit = await msg.answer('Символы, сейчас...')
@@ -71,7 +71,7 @@ async def symbol_guesser(msg: MessageMin, regex: str):
                                    conversation_message_id=msg_to_edit.conversation_message_id)
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('puzzle_answer'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule(f'<text1>\n<text2>\n\n&#8987;Путешествие продолжается...\n<notice>'))
 async def travel_check(msg: MessageMin, notice: str):
     res: Literal["safe", "warn", "danger"] | None = get_puzzles()['travel'].get(notice)
@@ -92,7 +92,7 @@ async def travel_check(msg: MessageMin, notice: str):
     return res
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('puzzle_answer'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule(['Дверь с грохотом открывается<text>\n\n<text1>',
                                   'Дверь с грохотом открывается<text>']))
 async def door_answer(msg: MessageMin, text: str):
@@ -114,7 +114,7 @@ async def door_answer(msg: MessageMin, text: str):
     return res
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('puzzle_answer'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule('Книгу целиком уже не спасти, но одна из страниц уцелела. Кусок текста на ней гласит: '
                                  '«...<page_text>...».'
                                  '\nОсталось определить, какая именно это была книга...'))
@@ -137,7 +137,7 @@ async def book_answer(msg: MessageMin, page_text: str):
     return res
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('elites'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule('Вы успешно обменяли элитные трофеи (<count:int>) на репутацию гильдии!'
                                  '\n&#127941;Текущая репутация гильдии: <all_count:int>'))
 async def elite_answer(msg: MessageMin, count: int):
@@ -174,7 +174,7 @@ async def elite_answer(msg: MessageMin, count: int):
     return await msg.reply(answer)
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('puzzle_answer'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule(f'Перед каждым проходом другими искателями приключений нацарапаны различные надписи, '
                                  f'которые, видимо, могут помочь определить, куда ведет конкретная дорога.\n'
                                  '&#128681;Западный путь: "<west_1>" и "<west_2>"\n'
@@ -197,7 +197,7 @@ async def cross_answer(msg: MessageMin, west_1: str, west_2: str, north_1: str, 
     return res
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access),
+@labeler.chat_message(HelpGroup('puzzle_answer'), AccessRule(RoleAccess.bot_access),
                       FwdPitRule('&#9989;Вы успешно присоединились к осадному лагерю гильдии <guild>!\n'
                                  '&#128100;Ваша роль: <siege_role> (+<count:int>&#<emoji:int>;)'))
 async def siege_answer(msg: MessageMin, guild: str, siege_role: str, count: int):

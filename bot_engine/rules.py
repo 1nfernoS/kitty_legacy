@@ -48,6 +48,19 @@ class AccessRule(ABCRule[MessageMin]):
         return result
 
 
+class HelpGroup(ABCRule[MessageMin]):
+    """
+    Dummy rule for `help` descriptions
+    Must be in all bot message labelers
+    """
+    def __init__(self, cmd_group: str):
+        self.cmd_group = cmd_group
+        return
+
+    async def check(self, event: MessageMin) -> bool:
+        return True
+
+
 class OverseerRule(ABCRule[MessageMin]):
     """
     Rule to check if message sent by overseer bot

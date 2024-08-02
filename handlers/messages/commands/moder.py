@@ -4,7 +4,7 @@ from sqlalchemy import or_
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 from bot_engine import labeler, api
-from bot_engine.rules import AccessRule, FwdOrReplyUserRule
+from bot_engine.rules import AccessRule, FwdOrReplyUserRule, HelpGroup
 
 from ORM import session, Role, User
 
@@ -13,7 +13,7 @@ from resources.emoji import gold
 from utils.formatters import balance_message_addition
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])
+@labeler.chat_message(HelpGroup('set_role'), FwdOrReplyUserRule(), AccessRule(RoleAccess.change_role), text=['role <name:str>', 'роль <name:str>'])
 async def change_role(msg: MessageMin, name: str):
     name = name.lower()
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
@@ -38,7 +38,7 @@ async def change_role(msg: MessageMin, name: str):
         return await msg.answer(f"Теперь пользователь имеет права {new_role.alias.capitalize()}")
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator), text=['kick', 'кик'])
+@labeler.chat_message(HelpGroup('kick'), FwdOrReplyUserRule(), AccessRule(RoleAccess.moderator), text=['kick', 'кик'])
 async def ban_user(msg: MessageMin):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
     if target_id == msg.from_id:
@@ -80,7 +80,7 @@ def _change_balance(target_id: int, value: int, action: Literal['change', 'set']
     return f"Готово, изменил баланс на {value}{gold}\n" + balance_message_addition(balance)
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
+@labeler.chat_message(HelpGroup('change_balance'), FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
                       text=['чек = <value:int>', 'check = <value:int>'])
 async def set_balance(msg: MessageMin, value: int):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
@@ -88,7 +88,7 @@ async def set_balance(msg: MessageMin, value: int):
     return await msg.answer(answer)
 
 
-@labeler.chat_message(FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
+@labeler.chat_message(HelpGroup('change_balance'), FwdOrReplyUserRule(), AccessRule(RoleAccess.change_balance),
                       text=['чек <value:int>', 'check <value:int>'])
 async def change_balance(msg: MessageMin, value: int):
     target_id: int = msg.reply_message.from_id if msg.reply_message else msg.fwd_messages[0].from_id
@@ -96,7 +96,7 @@ async def change_balance(msg: MessageMin, value: int):
     return await msg.answer(answer)
 
 
-@labeler.chat_message(AccessRule(RoleAccess.moderator),
+@labeler.chat_message(HelpGroup('bill'), AccessRule(RoleAccess.moderator),
                       text=['налоговая', 'bill'])
 async def bill(msg: MessageMin):
     with session() as s:

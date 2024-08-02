@@ -4,12 +4,12 @@ from data_typings.enums import RoleAccess
 from vkbottle.tools.dev.mini_types.bot import MessageMin
 
 from bot_engine import labeler
-from bot_engine.rules import AccessRule, FwdOrReplyUserRule
+from bot_engine.rules import AccessRule, FwdOrReplyUserRule, HelpGroup
 
 from utils.math import pure_price, commission_price
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['ping', 'пинг'])
+@labeler.chat_message(HelpGroup('ping'), AccessRule(RoleAccess.bot_access), text=['ping', 'пинг'])
 async def ping(msg: MessageMin):
     from random import choice
     answers: List[str] = ["Я живой", "Да живой я", "Все в порядке", "понг", "Что-то случилось?", "Не стучи ><",
@@ -20,7 +20,8 @@ async def ping(msg: MessageMin):
     await msg.answer(choice(answers))
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['грязными <money:int>', 'dirty <money:int>'])
+@labeler.chat_message(HelpGroup('money_calc'), AccessRule(RoleAccess.bot_access),
+                      text=['грязными <money:int>', 'dirty <money:int>'])
 async def dirty(msg: MessageMin, money: int):
     try:
         await msg.answer(pure_price(int(money)))
@@ -28,7 +29,8 @@ async def dirty(msg: MessageMin, money: int):
         return
 
 
-@labeler.chat_message(AccessRule(RoleAccess.bot_access), text=['чистыми <money:int>', 'pure <money:int>'])
+@labeler.chat_message(HelpGroup('money_calc'), AccessRule(RoleAccess.bot_access),
+                      text=['чистыми <money:int>', 'pure <money:int>'])
 async def pure(msg: MessageMin, money: int):
     try:
         await msg.answer(commission_price(int(money)))
@@ -36,7 +38,7 @@ async def pure(msg: MessageMin, money: int):
         return
 
 
-@labeler.chat_message(AccessRule(RoleAccess.admin_utils),
+@labeler.chat_message(HelpGroup('update_items'), AccessRule(RoleAccess.admin_utils),
                       text=['обнови предметы <start:int> <end:int>',
                             'update items <start:int> <end:int>',
                             'обновить предметы <start:int> <end:int>'])
