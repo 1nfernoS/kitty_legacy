@@ -269,4 +269,16 @@ async def ensure_tasks():
     return
 
 
+async def get_guild_chat_name():
+    from loguru import logger
+    from . import api
+    import config
+    
+    chat_info = await api.messages.get_conversations_by_id(2e9+config.GUILD_CHAT_ID)
+    logger.info(f"GUILD_CHAT_NAME ({config.GUILD_CHAT_ID}) = \"{chat_info.items[0].chat_settings.title}\"")
+    setattr(config, 'GUILD_CHAT_NAME', chat_info.items[0].chat_settings.title)
+    return
+
+
+bot.loop_wrapper.on_startup.append(get_guild_chat_name())
 bot.loop_wrapper.on_startup.append(ensure_tasks())

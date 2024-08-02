@@ -24,6 +24,7 @@ if not load_dotenv('.env'):
 
 GUILD_NAME: str = env.get('GUILD_NAME')
 GUILD_CHAT_ID: int = int(env.get('GUILD_CHAT_ID'))
+GUILD_CHAT_NAME: str
 
 PROFILE_KEY: str = env.get('PROFILE_KEY')
 PROFILE_ID: int = int(env.get('PROFILE_ID'))
@@ -58,7 +59,7 @@ ALLOWED_CHATS: Tuple[int, ...]
 
 def load(branch_name: str):
     if not load_dotenv('.env.' + branch_name):
-        print(f"No branch '{branch_name}', loaded 'dev' branch")
+        print(f"No branch '{branch_name}', loading 'dev' branch")
         branch_name = 'dev'
 
     if not load_dotenv('.env.' + branch_name, override=True):
