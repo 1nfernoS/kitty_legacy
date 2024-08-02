@@ -23,7 +23,7 @@ class WhiteListChatRule(ABCRule[MessageMin]):
         return
     
     async def check(self, event: MessageMin) -> bool:
-        return event.peer_id - 2e9 in self.allowed_chats
+        return event.peer_id < 2e9 or event.peer_id - 2e9 in self.allowed_chats
 
 
 class AccessRule(ABCRule[MessageMin]):
