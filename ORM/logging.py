@@ -121,7 +121,7 @@ class LogsCommand(_LogsBase, Base):
 
     command: Mapped[str] = mapped_column(String(127), nullable=False)
     command_text: Mapped[str] = mapped_column(String(255), nullable=False)
-    on_user: Mapped[int] = mapped_column(nullable=False)
+    on_user: Mapped[int] = mapped_column(nullable=True)
     on_user_text: Mapped[str] = mapped_column(String(255), nullable=True)
 
     def __init__(self, user_id: int, command: str, command_text: str, on_user: int = None, on_user_text: str = None):
